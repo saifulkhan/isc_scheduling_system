@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import uk.ac.isc.data.TaskBlock;
+import uk.ac.isc.data.VBASLogger;
 
 /**
  *
@@ -25,6 +26,10 @@ public class BlockTextPanel extends JPanel {
     public BlockTextPanel(TaskBlock tb) {
         
         this.indBlock = tb;
+        
+                System.out.println("getPPlanStartDay=" + indBlock.getPPlanStartDay() + ", getSPlanStartDay=" + indBlock.getSPlanStartDay());
+                
+        VBASLogger.logDebug("getPPlanStartDay=" + indBlock.getPPlanStartDay().toString() + ", getSPlanStartDay=" + indBlock.getSPlanStartDay().toString());
         
         String text = "The Block " + indBlock.getBlockID() + ":\n" +
                 "The total event number is: " + indBlock.getEventNumber() + "\n" +

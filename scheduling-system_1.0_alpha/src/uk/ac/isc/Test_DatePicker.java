@@ -23,7 +23,7 @@ import org.jdesktop.swingx.JXDatePicker;
  *
  * @author hui
  */
-public class DatePickerTestFrame {
+public class Test_DatePicker {
     
     public static void main (String [] args)
     {

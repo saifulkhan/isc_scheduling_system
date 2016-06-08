@@ -3,18 +3,12 @@ package uk.ac.isc.view;
 
 import java.awt.BorderLayout;
 import java.util.Date;
-import java.util.HashMap;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import uk.ac.isc.data.SeisEvent;
 import uk.ac.isc.data.SeisEventList;
-import uk.ac.isc.data.SeisEventsDAO;
+import uk.ac.isc.data.VBASLogger;
 
-/**
- * 
- * @author hui
- */
+
 public class AssignMainPanel extends JPanel {
     
      /*save all the events info assigned or unassigned*/
@@ -22,17 +16,14 @@ public class AssignMainPanel extends JPanel {
     
     /*get the range of showing the data*/
     private final Date startDate;
-    
     private final Date endDate;
     
-    private final TimelinePanel tPanel;
-    
-    private final MapPanel mPanel;
-    
-    private final AssignControlPanel bControlPanel;
+    private final TimelinePanel timelinePanel;
+    private final MapPanel mapPanel;
+    private final AssignControlPanel assignControlPanel;
     
     /**structure panes*/
-    private final JSplitPane interactPane;
+    private final JSplitPane split1;
     
     public AssignMainPanel(Date sDate, Date eDate, SeisEventList seList)
     {
@@ -40,58 +31,23 @@ public class AssignMainPanel extends JPanel {
         this.startDate = sDate;
         this.endDate = eDate;
         
-        /*build the three main panel*/
-        tPanel = new TimelinePanel(startDate,endDate,allEvents);
-        mPanel = new MapPanel(allEvents, false);
-        bControlPanel = new AssignControlPanel(tPanel,mPanel,startDate,endDate,allEvents);
+        //VBASLogger.logDebug("startDate=" + startDate + "endDate=" + endDate);
         
-        interactPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tPanel,mPanel);
-        interactPane.setSize(1400,850);
-        interactPane.setDividerLocation(0.4d);
+        // create three panels 
+        timelinePanel = new TimelinePanel(startDate,endDate,allEvents);
+        mapPanel = new MapPanel(allEvents, false);
+        assignControlPanel = new AssignControlPanel(timelinePanel,mapPanel,startDate,endDate,allEvents);
+        
+        split1 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, timelinePanel,mapPanel);
+        split1.setSize(1400,850);
+        split1.setDividerLocation(0.4d);
         
         this.setSize(1400,1000);
         this.setLayout(new BorderLayout());
-        this.add(bControlPanel,BorderLayout.NORTH);
-        this.add(interactPane,BorderLayout.CENTER);
+        this.add(assignControlPanel,BorderLayout.NORTH);
+        this.add(split1,BorderLayout.CENTER);
         
-        allEvents.addObserver(tPanel);
-        allEvents.addObserver(mPanel);
+        allEvents.addObserver(timelinePanel);
+        allEvents.addObserver(mapPanel);
     }
-    
-    /*public static void main(String[] args)
-    {
-        JFrame frame = new JFrame("Assignment Panel Test");
-        frame.setSize(1400, 1000);
-        
-        Date startDate = SeisEventsDAO.retrieveStartDate();
-        startDate.setHours(0);
-        startDate.setMinutes(0);
-        startDate.setSeconds(0);
-        Date endDate = SeisEventsDAO.retrieveEndDate();
-        endDate.setHours(23);
-        endDate.setMinutes(59);
-        endDate.setSeconds(59);
-        
-        SeisEventList events = new SeisEventList();
-        HashMap<Integer,Integer> selEv = new HashMap<>();
-        
-        //load the events
-        SeisEventsDAO.retrieveAllEvents(events.getSeisEvents());
-        SeisEventsDAO.retrieveAllocatedEvID(selEv);
-        //set assigned flag to events
-        for(SeisEvent se:events.getSeisEvents())
-        {
-            if(selEv.containsKey(se.getEvid()))
-            {
-                se.setblAssigned(true);
-                se.setBlockID(selEv.get(se.getEvid()));
-            }
-        }
-        
-        frame.add(new AssignMainPanel(startDate,endDate,events));
-        
-                java.awt.EventQueue.invokeLater(() -> {
-         frame.setVisible(true);
-        });
-    }*/
 }

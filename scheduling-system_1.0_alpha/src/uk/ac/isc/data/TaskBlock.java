@@ -2,13 +2,12 @@ package uk.ac.isc.data;
 
 import java.util.Date;
 import java.util.Objects;
-
+import java.util.Observable;
 
 /**
  * The class to keep the record of each assigned block
  */
-
-public class TaskBlock implements Comparable<TaskBlock> {
+public class TaskBlock extends Observable implements Comparable<TaskBlock> {
 
     private Integer blockID;
     private Date startDay;
@@ -34,8 +33,36 @@ public class TaskBlock implements Comparable<TaskBlock> {
     private Date fPlanStartDay;
     private Date fPlanEndDay;
 
+    public TaskBlock() {
+
+    }
+
     public TaskBlock(Integer bid) {
         this.blockID = bid;
+    }
+
+    public void setTaskBlock(TaskBlock tb) {
+
+        this.blockID = tb.blockID;
+        this.startDay = tb.startDay;
+        this.endDay = tb.endDay;
+        this.regionID = tb.regionID;
+        this.analyst1ID = tb.analyst1ID;
+        this.analyst2ID = tb.analyst2ID;
+        this.analyst3ID = tb.analyst3ID;
+        this.analyst1 = tb.analyst1;
+        this.analyst2 = tb.analyst2;
+        this.analyst3 = tb.analyst3;
+        this.reviewStatus = tb.reviewStatus;
+        this.eventNumber = tb.eventNumber;
+        this.reviewedNumber = tb.reviewedNumber;
+        this.totalPhaseNumber = tb.totalPhaseNumber;
+        this.pPlanStartDay = tb.pPlanStartDay;
+        this.pPlanEndDay = tb.pPlanEndDay;
+        this.sPlanStartDay = tb.sPlanStartDay;
+        this.sPlanEndDay = tb.sPlanEndDay;
+        this.fPlanStartDay = tb.fPlanStartDay;
+        this.fPlanEndDay = tb.fPlanEndDay;
     }
 
     public void setBlockID(Integer bid) {
@@ -213,7 +240,6 @@ public class TaskBlock implements Comparable<TaskBlock> {
 
         TaskBlock tb = (TaskBlock) another;
         return (this.blockID.equals(tb.blockID));
-
     }
 
     @Override
@@ -225,17 +251,16 @@ public class TaskBlock implements Comparable<TaskBlock> {
 
     @Override
     public String toString() {
-
         return this.blockID.toString();
     }
 
     @Override
     public int compareTo(TaskBlock o) {
-
         int idComp = this.blockID.compareTo(o.blockID);
-
         return idComp;
-
     }
 
+    public void setChangeFlag() {
+        setChanged();
+    }
 }

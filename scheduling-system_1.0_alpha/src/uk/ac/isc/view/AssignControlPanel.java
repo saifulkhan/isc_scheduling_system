@@ -14,10 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import org.apache.commons.lang3.time.DateUtils;
-import uk.ac.isc.data.BlockTableModel;
 import uk.ac.isc.data.SeisEvent;
 import uk.ac.isc.data.SeisEventList;
 import uk.ac.isc.data.SeisEventsDAO;
@@ -86,7 +83,6 @@ public class AssignControlPanel extends JPanel {
     {
         this.tpRef = tp;
         this.mpRef = mp;
-        
         this.seList = se;
         //this.startDate = startDate;
         //this.endDate = endDate;
@@ -284,7 +280,7 @@ public class AssignControlPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 /*get selection number*/
                 int tSelNum = 0, gSelNum = 0;
-                for(SeisEvent ev:seList.getSeisEvents())
+                for(SeisEvent ev:seList.getSeisEventList())
                 {
                     if(ev.getTSelction()==true && ev.getblAssigned()!=true)
                     {
@@ -336,9 +332,9 @@ public class AssignControlPanel extends JPanel {
                     
                     if(gSelNum>0)
                     {
-                        commitSuccess = SeisEventsDAO.createBlock(seList.getSeisEvents(),tpRef.getSelectedStartDate(), tpRef.getSelectedEndDate(), true, tb);
+                        commitSuccess = SeisEventsDAO.createBlock(seList.getSeisEventList(),tpRef.getSelectedStartDate(), tpRef.getSelectedEndDate(), true, tb);
                         /*after commitment, change the flag to selection*/
-                        for(SeisEvent ev:seList.getSeisEvents())
+                        for(SeisEvent ev:seList.getSeisEventList())
                         {
                             if(ev.getTSelction()==true && ev.getGSelction()==true)
                             {
@@ -349,9 +345,9 @@ public class AssignControlPanel extends JPanel {
                     }
                     else
                     {
-                        commitSuccess = SeisEventsDAO.createBlock(seList.getSeisEvents(),tpRef.getSelectedStartDate(), tpRef.getSelectedEndDate(), false,tb);
+                        commitSuccess = SeisEventsDAO.createBlock(seList.getSeisEventList(),tpRef.getSelectedStartDate(), tpRef.getSelectedEndDate(), false,tb);
                         /*after commitment, change the flag to selection*/
-                        for(SeisEvent ev:seList.getSeisEvents())
+                        for(SeisEvent ev:seList.getSeisEventList())
                         {
                             if(ev.getTSelction()==true)
                             {

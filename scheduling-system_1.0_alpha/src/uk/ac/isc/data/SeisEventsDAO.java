@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Level;
 import javax.swing.JOptionPane;
 
 /**
@@ -74,14 +75,23 @@ public class SeisEventsDAO {
             while (rs.next()) {
 
                 try {
-                    System.out.println(rs.getString(0));
-                    startDate = df.parse(rs.getString(0));
+                    System.out.println(rs.getString(1));
+                    startDate = df.parse(rs.getString(1));
+
                 } catch (ParseException e) {
+                    String message = "Failed parsing startDate= " + startDate;
+                    VBASLogger.logSevere(message);
+                    JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
                     return null;
                 }
             }
 
         } catch (SQLException ex) {
+            String message = "Failed SQL query= " + query
+                    + "\nex" + ex
+                    + "\nPlease report to the system administrator!";
+            VBASLogger.logSevere(message);
+            JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
             return null;
         } finally {
             try {
@@ -96,9 +106,21 @@ public class SeisEventsDAO {
                 }
 
             } catch (SQLException ex) {
-
+                String message = "Failed SQL query= " + query
+                        + "\nex" + ex
+                        + "\nPlease report to the system administrator!";
+                VBASLogger.logSevere(message);
+                JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
                 return null;
             }
+        }
+
+        VBASLogger.logDebug("startDate=" + startDate);
+        if (startDate == null) {
+            String message = "startDate= " + startDate + "\nPlease report to the system administrator!";
+            VBASLogger.logSevere(message);
+            JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
+            return startDate;
         }
 
         return startDate;
@@ -135,14 +157,21 @@ public class SeisEventsDAO {
             while (rs.next()) {
 
                 try {
-                    System.out.println(rs.getString(0));
-                    endDate = df.parse(rs.getString(0));
+                    endDate = df.parse(rs.getString(1));
                 } catch (ParseException e) {
+                    String message = "Failed parsing endDate= " + endDate;
+                    VBASLogger.logSevere(message);
+                    JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
                     return null;
                 }
             }
 
         } catch (SQLException ex) {
+            String message = "Failed SQL query= " + query
+                    + "\nex" + ex
+                    + "\nPlease report to the system administrator!";
+            VBASLogger.logSevere(message);
+            JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
             return null;
         } finally {
             try {
@@ -157,9 +186,20 @@ public class SeisEventsDAO {
                 }
 
             } catch (SQLException ex) {
-
+                String message = "Failed SQL query= " + query
+                        + "\nex" + ex
+                        + "\nPlease report to the system administrator!";
+                VBASLogger.logSevere(message);
+                JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
                 return null;
             }
+        }
+
+        if (endDate == null) {
+            String message = "startDate= " + endDate + "\nPlease report to the system administrator!";
+            VBASLogger.logSevere(message);
+            JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
+            return endDate;
         }
 
         return endDate;
@@ -175,7 +215,9 @@ public class SeisEventsDAO {
         VBASLogger.logDebug("SeisEventsDAO::retrieveAllEvents");
 
         //clear the memory of seisEvent in order to reload events
-        seisEvents.clear();
+        if (seisEvents.size() > 0) { 
+            seisEvents.clear();
+        }
 
         Connection con = null;
         Statement st = null;
@@ -189,6 +231,8 @@ public class SeisEventsDAO {
                 + " WHERE e.prime_hyp = h.hypid"
                 + " AND h.isc_evid = e.evid AND e.banished IS NULL AND e.ready IS NOT NULL"
                 + " ORDER BY h.day ASC;";
+
+        VBASLogger.logDebug("query = " + query);
 
         try {
             con = DriverManager.getConnection(url, user, password);
@@ -216,6 +260,9 @@ public class SeisEventsDAO {
             }
 
         } catch (SQLException ex) {
+            String message = "Failed SQL query: " + query + "\nPlease report to the system administrator!";
+            VBASLogger.logSevere(message);
+            JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         } finally {
             try {
@@ -230,12 +277,24 @@ public class SeisEventsDAO {
                 }
 
             } catch (SQLException ex) {
-
+                String message = "Failed SQL query: " + query + "\nPlease report to the system administrator!";
+                VBASLogger.logSevere(message);
+                JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         }
 
+        VBASLogger.logDebug("Number of seiesevents: " + seisEvents.size());
+
+        if (seisEvents.size() <= 0) {
+            String message = "Number of seiesevents = 0. \nPlease report to the system administrator!";
+            VBASLogger.logSevere(message);
+            JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
         return true;
+
     }
 
     /**
@@ -333,7 +392,6 @@ public class SeisEventsDAO {
             rs = st.executeQuery(query);
 
             while (rs.next()) {
-
                 evSet.put(rs.getInt(1), rs.getInt(2));
             }
 
@@ -380,10 +438,11 @@ public class SeisEventsDAO {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         String query = "SELECT e.evid, h.day, h.lat, h.lon"
-                + " FROM event e, hypocenter h, allocation a"
+                + " FROM event e, hypocenter h"
                 + " WHERE e.prime_hyp = h.hypid"
                 + " AND h.isc_evid = e.evid AND e.banished IS NULL AND e.ready IS NOT NULL"
-                + " AND a.evid = e.evid AND a.block_id = " + blockID
+                + " AND e.evid IN ( SELECT ea.evid FROM event_allocation ea, block_allocation ba WHERE ba.block_id = " + blockID
+                + " AND ea.block_allocation_id = ba.id ) "
                 + " ORDER BY h.day ASC;";
 
         try {
@@ -1206,7 +1265,7 @@ public class SeisEventsDAO {
     }
 
     public static boolean loadBlocks(HashSet<TaskBlock> blockSet) {
-        VBASLogger.logDebug("SeisEventsDAO::loadBlocks");
+        VBASLogger.logDebug("Here...");
 
         //clear the memory of blockArray in order to reload events
         //blockArray.clear();

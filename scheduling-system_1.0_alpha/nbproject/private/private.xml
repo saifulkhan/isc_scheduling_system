@@ -8,6 +8,21 @@
             <file>file:/export/home/hui/NetBeansProjects/sub2/scheduling/Schekuling0.1.1/src/uk/ac/isc/data/SeisEventsDAO.java</file>
             <file>file:/export/home/hui/NetBeansProjects/sub2/scheduling/Schekuling0.1.1/src/uk/ac/isc/DatePickerTestFrame.java</file>
         </group>
-        <group/>
+        <group>
+            <file>file:/home/saiful/DATA-ISC/scheduling-system/scheduling-system_1.0_alpha/src/uk/ac/isc/SchedularMainWindow.java</file>
+            <file>file:/home/saiful/DATA-ISC/scheduling-system/scheduling-system_1.0_alpha/src/uk/ac/isc/data/SeisEvent.java</file>
+            <file>file:/home/saiful/DATA-ISC/scheduling-system/scheduling-system_1.0_alpha/src/uk/ac/isc/data/SeisEventList.java</file>
+            <file>file:/home/saiful/DATA-ISC/scheduling-system/scheduling-system_1.0_alpha/src/uk/ac/isc/view/BlockControlPanel.java</file>
+            <file>file:/home/saiful/DATA-ISC/scheduling-system/scheduling-system_1.0_alpha/src/uk/ac/isc/view/BlockTable.java</file>
+            <file>file:/home/saiful/DATA-ISC/scheduling-system/scheduling-system_1.0_alpha/src/uk/ac/isc/data/TaskBlock.java</file>
+            <file>file:/home/saiful/DATA-ISC/scheduling-system/scheduling-system_1.0_alpha/src/uk/ac/isc/view/AnalystView.java</file>
+            <file>file:/home/saiful/DATA-ISC/scheduling-system/scheduling-system_1.0_alpha/src/uk/ac/isc/view/BlockTableModel.java</file>
+            <file>file:/home/saiful/DATA-ISC/scheduling-system/scheduling-system_1.0_alpha/src/uk/ac/isc/view/BlockTextPanel.java</file>
+            <file>file:/home/saiful/DATA-ISC/scheduling-system/scheduling-system_1.0_alpha/src/uk/ac/isc/view/AssignMainPanel.java</file>
+            <file>file:/home/saiful/DATA-ISC/scheduling-system/scheduling-system_1.0_alpha/src/uk/ac/isc/data/TaskBlockList.java</file>
+            <file>file:/home/saiful/DATA-ISC/scheduling-system/scheduling-system_1.0_alpha/src/uk/ac/isc/view/BlockView.java</file>
+            <file>file:/home/saiful/DATA-ISC/scheduling-system/scheduling-system_1.0_alpha/src/uk/ac/isc/view/BlockInfoPanel.java</file>
+            <file>file:/home/saiful/DATA-ISC/scheduling-system/scheduling-system_1.0_alpha/src/uk/ac/isc/data/SeisEventsDAO.java</file>
+        </group>
     </open-files>
 </project-private>

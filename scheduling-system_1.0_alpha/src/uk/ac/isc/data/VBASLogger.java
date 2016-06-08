@@ -5,13 +5,12 @@
  */
 package uk.ac.isc.data;
 
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class VBASLogger {
-    
-      /*
+
+    /*
      *****************************************************************************************
      * TODO: in a separate class. 
      *****************************************************************************************
@@ -43,7 +42,7 @@ public class VBASLogger {
                 substring(Thread.currentThread().getStackTrace()[2].getClassName().
                         lastIndexOf(".") + 1) + ":"
                 + Thread.currentThread().getStackTrace()[2].getMethodName();
-        Logger.getLogger(at).log(Level.INFO, debugString);
-        //System.out.println("[" + at + "]->" + debugString);
+        //Logger.getLogger(at).log(Level.INFO, debugString);
+        System.out.println("[" + at + "]->" + debugString);
     }
 }

@@ -1,9 +1,10 @@
-
 package uk.ac.isc.view;
 
 import java.awt.BorderLayout;
 import java.awt.TextArea;
 import java.text.SimpleDateFormat;
+import java.util.Observable;
+import java.util.Observer;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import uk.ac.isc.data.TaskBlock;
@@ -13,76 +14,55 @@ import uk.ac.isc.data.VBASLogger;
  *
  * @author hui
  */
-public class BlockTextPanel extends JPanel {
-    
-    TaskBlock indBlock;
-    
-    private final JScrollPane scrollPane;
-    
+public class BlockTextPanel extends JPanel implements Observer {
+
+    private TaskBlock selectedTaskBlock;
+
     private final TextArea blockText;
-
     private SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-    
+
     public BlockTextPanel(TaskBlock tb) {
-        
-        this.indBlock = tb;
-        
-                System.out.println("getPPlanStartDay=" + indBlock.getPPlanStartDay() + ", getSPlanStartDay=" + indBlock.getSPlanStartDay());
-                
-        VBASLogger.logDebug("getPPlanStartDay=" + indBlock.getPPlanStartDay().toString() + ", getSPlanStartDay=" + indBlock.getSPlanStartDay().toString());
-        
-        String text = "The Block " + indBlock.getBlockID() + ":\n" +
-                "The total event number is: " + indBlock.getEventNumber() + "\n" +
-                "The total phase number is: " + indBlock.getPhaseNumber() + "\n" +
-                "The current status is in " + indBlock.getStatus() + " Stage.\n" +
-                "The primary analyst is: " + indBlock.getAnalyst1() + "\n" +
-                "The planned review date of the P stage is from" + df.format(indBlock.getPPlanStartDay()) + 
-                " to " + df.format(indBlock.getPPlanEndDay()) + "\n" +
-                "The secondary analyst is: " + indBlock.getAnalyst2() + "\n" +
-                "The planned review date of the S stage is from" + df.format(indBlock.getSPlanStartDay()) + 
-                " to " + df.format(indBlock.getSPlanEndDay()) + "\n" +
-                "The final check analyst is: " + indBlock.getAnalyst3() + "\n" +
-                "The planned review date of the F stage is from" + df.format(indBlock.getFPlanStartDay()) + 
-                " to " + df.format(indBlock.getFPlanEndDay());
-        
-        blockText = new TextArea(text);
-        scrollPane = new JScrollPane(blockText);
-        
+
+        this.selectedTaskBlock = tb;
+
+        blockText = new TextArea();
         this.setLayout(new BorderLayout());
-        this.add(scrollPane, BorderLayout.CENTER);
+        this.add(blockText, BorderLayout.CENTER);
+        
+        this.updateText();
     }
 
-    public BlockTextPanel() {
-        
-        String text = "No Taskblock Assigned Yet!";
-        
-        blockText = new TextArea(text);
-        scrollPane = new JScrollPane(blockText);
-        
-        this.setLayout(new BorderLayout());
-        this.add(scrollPane, BorderLayout.CENTER);
+    @Override
+    public void update(Observable o, Object o1) {
+        VBASLogger.logDebug("Update text...");
+        updateText();
     }
 
-    public void setTaskBlock(TaskBlock tb) {
-        this.indBlock = tb;
+    void updateText() {
         
-        String text = "The Block " + indBlock.getBlockID() + ":\n" +
-                "The total event number is: " + indBlock.getEventNumber() + "\n" +
-                "The total phase number is: " + indBlock.getPhaseNumber() + "\n" +
-                "The current status is in " + indBlock.getStatus() + " Stage.\n" +
-                "The primary analyst is: " + indBlock.getAnalyst1() + "\n" +
-                "The planned review date of the P stage is from" + df.format(indBlock.getPPlanStartDay()) + 
-                " to " + df.format(indBlock.getPPlanEndDay()) + "\n" +
-                "The secondary analyst is: " + indBlock.getAnalyst2() + "\n" +
-                "The planned review date of the S stage is from" + df.format(indBlock.getSPlanStartDay()) + 
-                " to " + df.format(indBlock.getSPlanEndDay()) + "\n" +
-                "The final check analyst is: " + indBlock.getAnalyst3() + "\n" +
-                "The planned review date of the F stage is from" + df.format(indBlock.getFPlanStartDay()) + 
-                " to " + df.format(indBlock.getFPlanEndDay());
+        String text;
+        if(selectedTaskBlock.getBlockID() <= 0) {
+                    text = "No Taskblock Assigned Yet!";
+        } else {
+
+             text = "The Block " + selectedTaskBlock.getBlockID() + ":\n"
+                + "The total event number is: " + selectedTaskBlock.getEventNumber() + "\n"
+                + "The total phase number is: " + selectedTaskBlock.getPhaseNumber() + "\n"
+                + "The current status is in " + selectedTaskBlock.getStatus() + " Stage.\n"
+                + "The primary analyst is: " + selectedTaskBlock.getAnalyst1() + "\n"
+                + "The planned review date of the P stage is from" + df.format(selectedTaskBlock.getPPlanStartDay())
+                + " to " + df.format(selectedTaskBlock.getPPlanEndDay()) + "\n"
+                + "The secondary analyst is: " + selectedTaskBlock.getAnalyst2() + "\n"
+                + "The planned review date of the S stage is from" + df.format(selectedTaskBlock.getSPlanStartDay())
+                + " to " + df.format(selectedTaskBlock.getSPlanEndDay()) + "\n"
+                + "The final check analyst is: " + selectedTaskBlock.getAnalyst3() + "\n"
+                + "The planned review date of the F stage is from" + df.format(selectedTaskBlock.getFPlanStartDay())
+                + " to " + df.format(selectedTaskBlock.getFPlanEndDay());
+        }
+        //VBASLogger.logDebug("text:" + text);
         
-        blockText.setText(text);
         blockText.repaint();
-        //this.repaint();
-    }
-    
+        blockText.setText(text);
+      }
+
 }

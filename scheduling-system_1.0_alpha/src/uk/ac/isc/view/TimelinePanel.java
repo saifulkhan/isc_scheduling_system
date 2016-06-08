@@ -29,6 +29,7 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.IntervalXYDataset;
 import uk.ac.isc.data.SeisEvent;
 import uk.ac.isc.data.SeisEventList;
+import uk.ac.isc.data.VBASLogger;
 
 /**
  *
@@ -95,6 +96,9 @@ public class TimelinePanel extends JPanel implements Observer {
         
         createChart();
         
+        
+        VBASLogger.logDebug("startDate=" + startDate + "endDate=" + endDate);
+        
         this.startDate = startDate;
         this.endDate = endDate;
         selectedStartDate = new Date(startDate.getTime());
@@ -118,7 +122,7 @@ public class TimelinePanel extends JPanel implements Observer {
         //} else {
             this.selectedStartDate = selectedStartDate;
         //}
-        for(SeisEvent se:seList.getSeisEvents())
+        for(SeisEvent se:seList.getSeisEventList())
         {
             if((se.getOrigTime().after(selectedStartDate)||se.getOrigTime().equals(selectedStartDate) )&& se.getOrigTime().before(selectedEndDate))
             {
@@ -148,7 +152,7 @@ public class TimelinePanel extends JPanel implements Observer {
         //} else {
             this.selectedEndDate = selectedEndDate;
         //}
-        for(SeisEvent se:seList.getSeisEvents())
+        for(SeisEvent se:seList.getSeisEventList())
         {
             if(se.getOrigTime().after(selectedStartDate) && se.getOrigTime().before(selectedEndDate))
             {
@@ -180,9 +184,9 @@ public class TimelinePanel extends JPanel implements Observer {
         int unassignedCount = 0, assignedCount = 0;
         int phaseCount = 0;
         
-        Day curr = new Day(seList.getSeisEvents().get(0).getOrigTime());
+        Day curr = new Day(seList.getSeisEventList().get(0).getOrigTime());
         
-        for (SeisEvent seisEvent : seList.getSeisEvents()) {
+        for (SeisEvent seisEvent : seList.getSeisEventList()) {
             if(new Day(seisEvent.getOrigTime()).equals(curr) && seisEvent.getblAssigned()==true)
             {
                 assignedCount++;

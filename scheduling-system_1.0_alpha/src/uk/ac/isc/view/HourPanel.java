@@ -75,7 +75,7 @@ public class HourPanel extends JPanel implements MouseListener {
         curr = new Day(selectDay);
         currHour = new Hour(0,curr);
 
-        for (SeisEvent seisEvent : seList.getSeisEvents()) {
+        for (SeisEvent seisEvent : seList.getSeisEventList()) {
 
             if(new Day(seisEvent.getOrigTime()).equals(curr) && seisEvent.getblAssigned()==false)
             {

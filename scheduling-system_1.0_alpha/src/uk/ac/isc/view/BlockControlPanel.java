@@ -14,17 +14,14 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.UIManager;
+import uk.ac.isc.data.GlobalStorage;
 import uk.ac.isc.data.SeisEvent;
 import uk.ac.isc.data.SeisEventList;
-import uk.ac.isc.data.SeisEventsDAO;
-import uk.ac.isc.data.TaskBlock;
 
 /**
  * this panel has several buttons to control the information showing in the
@@ -34,106 +31,69 @@ import uk.ac.isc.data.TaskBlock;
  */
 public class BlockControlPanel extends JPanel {
 
-    /**
-     * Here are the data
-     */
-    private final Date startDate;
-    private final Date endDate;
-
-    private final SeisEventList seisEventList;
-
-    private final JButton newButton = new JButton("New");
+    //private final SeisEventList seisEventList = GlobalStorage.getSeisEventList();
+ 
+    private final JButton button_refresh = new JButton("Refresh");
     private final JButton emailButton = new JButton("Email");
     private final JLabel gap1 = new JLabel("  ");
 
-    public BlockControlPanel(Date startDate, Date endDate, SeisEventList seisEventList) {
+    private final Date startDate;
+    private final Date endDate;
+    private final SeisEventList seList;
+    
+    public BlockControlPanel(Date startDate, Date endDate, SeisEventList allEvents) {
+
         this.startDate = startDate;
         this.endDate = endDate;
-        this.seisEventList = seisEventList;
-
-        newButton.setPreferredSize(new Dimension(150, 40));
-        newButton.setFocusPainted(false);
-        newButton.setBackground(new Color(59, 89, 182));
-        newButton.setForeground(Color.WHITE);
-        newButton.setFont(new Font("Tahoma", Font.BOLD, 14));
+        this.seList = allEvents;
+        
+        
+        button_refresh.setPreferredSize(new Dimension(150, 40));
+        button_refresh.setFocusPainted(false);
+        button_refresh.setBackground(new Color(59, 89, 182));
+        button_refresh.setForeground(Color.WHITE);
+        button_refresh.setFont(new Font("Tahoma", Font.BOLD, 14));
+        
         emailButton.setPreferredSize(new Dimension(150, 40));
-        //emailButton.setFocusPainted(false);
         emailButton.setBackground(new Color(59, 89, 182));
         emailButton.setForeground(Color.WHITE);
         emailButton.setFont(new Font("Tahoma", Font.BOLD, 14));
 
         this.setLayout(new FlowLayout());
-        this.add(newButton);
+        this.add(button_refresh);
         this.add(gap1);
         this.add(emailButton);
 
+        
         /* 
-         * New button - Action listener
+         * Refresh button action listener
          */
-        newButton.addActionListener(new ActionListener() {
+        button_refresh.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
-                AssignMainPanel amp = new AssignMainPanel(startDate, endDate, seisEventList);
-                String[] options = {"OK"};
-                UIManager.put("OptionPane.minimumSize", new Dimension(1400, 850));
-                int result = JOptionPane.showOptionDialog(null, amp, "Create Blocks by grouping unassigned events",
-                        JOptionPane.NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-
-                //if the assign window is closed, change the selection states of the events
-                //if (result == JOptionPane.OK_OPTION) {
-                for (SeisEvent se : seisEventList.getSeisEventList()) {
-                    se.setTSelection(true);
-                    se.setGSelection(false);
-                }
-                
-                seisEventList.setChangeFlag();
-                seisEventList.notifyObservers();
+                GlobalStorage.loadData();
                 
                 /*
-                blockInfoPanel.getBlockTableModel().reload();
-                SeisEventsDAO.retrieveBlockEventNumber(blockInfoPanel.getBlockTableModel().getTaskBlockArray());
-                SeisEventsDAO.retrieveBlockReviewedEventNumber(blockInfoPanel.getBlockTableModel().getTaskBlockArray());
-
-                //biPanel.getBlockTableModel().fireTableDataChanged();
-                blockInfoPanel.getBlockTable().setModel(blockInfoPanel.getBlockTableModel());
-
-                if (blockInfoPanel.getBlockTableModel().getTaskBlockArray().size() > 0) {
-                    blockInfoPanel.getBlockTable().setRowSelectionInterval(0, 0);
-                    //int bid = (Integer) blockInfoPanel.getBlockTable().getValueAt(0, 0);
-                    //reload the phase number
-                    for (TaskBlock tb : blockInfoPanel.getBlockTableModel().getTaskBlockArray()) {
-                        tb.setPhaseNumber(0);
-                    }
-
-                    for (SeisEvent se : seisEventList.getSeisEventList()) {
-
-                        if (se.getBlockID() != null) {
-                            for (TaskBlock tb : blockInfoPanel.getBlockTableModel().getTaskBlockArray()) {
-                                if (tb.getBlockID().equals(se.getBlockID())) {
-                                    tb.setPhaseNumber(tb.getPhaseNumber() + se.getPhaseNumber());
-                                }
-                            }
-
-                        }
-                    }
-                } else {
-                    return;
-                }
-
-                blockInfoPanel.getBlockTable().updateUI();
-                blockInfoPanel.getAnalystView().updateBlocks();
-                blockInfoPanel.getBlockView().repaint();
-                //biPanel.getBlockTable().updateUI();
-                //seList.setChangeFlag();
-                //}
+                AssignPanel amp = new AssignPanel(startDate, endDate);
+                String[] options = {"OK"};
+                UIManager.put("OptionPane.minimumSize", new Dimension(1400,850));
+                int result = JOptionPane.showOptionDialog(null, amp, "Create Blocks by grouping unassigned events", 
+                        JOptionPane.NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options , options[0]);
                 
-                */
+                //if the assign window is closed, change the selection states of the events
+                //if (result == JOptionPane.OK_OPTION) {
+                 
+                    for(SeisEvent se : seList.getSeisEventList())
+                    {
+                        se.setTSelection(true);
+                        se.setGSelection(false);
+                    }
+                    */
+                
             }
         });
 
         emailButton.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
 

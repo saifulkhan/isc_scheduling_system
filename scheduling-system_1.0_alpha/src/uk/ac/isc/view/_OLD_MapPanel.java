@@ -10,89 +10,94 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.Observable;
 import java.util.Observer;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import org.openstreetmap.gui.jmapviewer.OsmMercator;
-import uk.ac.isc.data.GlobalStorage;
 import uk.ac.isc.data.SeisEvent;
 import uk.ac.isc.data.SeisEventList;
-import uk.ac.isc.data.TaskBlock;
-import uk.ac.isc.data.VBASLogger;
 
 /**
  * This panel is for selecting events on the map and manipulating
  *
+ * @author hui
  */
-public class MapPanel extends JPanel implements MouseListener, Observer {
+public class _OLD_MapPanel extends JPanel implements MouseListener, Observer {
 
-    private final SeisEventList seisEventList;
+    /**
+     * A data reference for showing the figure
+     */
+    private SeisEventList seList;
 
-    private boolean notAssign = false; // two maps can be drawn from this class, one to assign
-
+    /**
+     * the map size to select region
+     */
     private double mapSize = 800;
-    private double scale; //Original map is 256 by 256, scale up when a bigger map is needed
 
-    /// we shift the map to make it seismicity meaningful, while we need recalculate the cooridinate to project the events
+    /**
+     * Original map is 256 by 256, scale factor when bigger map is needed
+     */
+    private double scale;
+
+    /*we shift the map to make it seismicity meaningful, while we need recalculate the cooridinate to project the events*/
     private double transX;
+
     private int leftX, rightX;
 
-    // map displacement on the panel
+    /**
+     * map displacement on the panel
+     */
     int dispx, dispy;
 
-    // Set true for polygon selection, otherwise, use rectangle selection
+    /**
+     * Set true for polygon selection, otherwise, use rectangle selection
+     */
     private boolean polySelect = false;
-    private boolean polyStart = true;
-    private double tempLat, tempLon;
-    private Double Lat1 = null, Lat2 = null, Lon1 = null, Lon2 = null;
 
+    private double tempLat, tempLon;
+
+    private Double Lat1, Lat2, Lon1, Lon2;
+
+    private boolean assignedFlag = false;
+
+    /**
+     * map to show all the events on top
+     */
     private BufferedImage origMap = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
+
     private BufferedImage miniMap = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
+
+    /*variables for drawing polygon*/
+    private boolean polyStart = true;
 
     private Path2D path;
 
-    private SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+    public _OLD_MapPanel(SeisEventList se, boolean assigned) {
+        this.seList = se;
 
-    public MapPanel(SeisEventList seisEventList, boolean notAssign) {
-
-        this.seisEventList = seisEventList;
-        this.notAssign = notAssign;
-
-        if (notAssign) {
-            VBASLogger.logDebug("@selectedSeisEventList: " + seisEventList);
-            VBASLogger.logDebug("#selectedSeisEventList: " + seisEventList.getSeisEventList().size());
-        } else {
-            VBASLogger.logDebug("@seisEventList: " + seisEventList);
-            VBASLogger.logDebug("#seisEventList: " + seisEventList.getSeisEventList().size());
-        }
+        this.assignedFlag = assigned;
 
         URL url1 = getClass().getClassLoader().getResource("main/resource/map.png");
+
         try {
             origMap = ImageIO.read(url1);
         } catch (IOException ex) {
-            //
         }
 
         genSwappedMap(151.0);
+        //this.setSize(new Dimension((int)mapSize,(int)mapSize));
+
         scale = mapSize / 256;
+        Lat1 = null;
+        Lat2 = null;
+        Lon1 = null;
+        Lon2 = null;
 
         addMouseListener(this);
-    }
 
-    // When selectedSiesEventListor TaskBlock selection is changed in the BlockTable
-    @Override
-    public void update(Observable o, Object arg) {
-        VBASLogger.logDebug(" Update MapPanel... " + "notAssign=" + notAssign);
-        this.removeAll();
-        this.updateUI();
-        
-        this.repaint();
     }
 
     public void setMapSize(int mapSize) {
@@ -101,8 +106,13 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
         this.repaint();
     }
 
+    public void setEvents(SeisEventList evList) {
+        this.seList = evList;
+        this.repaint();
+    }
+
     public void setRegionUnselection() {
-        for (SeisEvent ev : seisEventList.getSeisEventList()) {
+        for (SeisEvent ev : seList.getSeisEventList()) {
             ev.setGSelection(false);
         }
 
@@ -123,14 +133,6 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
     }
 
     private void genSwappedMap(double longInMiddle) {
-
-        if (notAssign) {
-            VBASLogger.logDebug("@selectedSeisEventList: " + seisEventList);
-            VBASLogger.logDebug("#selectedSeisEventList: " + seisEventList.getSeisEventList().size());
-        } else {
-            VBASLogger.logDebug("@seisEventList: " + seisEventList);
-            VBASLogger.logDebug("#seisEventList: " + seisEventList.getSeisEventList().size());
-        }
 
         double px = OsmMercator.LonToX(longInMiddle, 0);
         transX = 128 - px;
@@ -155,24 +157,14 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
             g2.drawImage(leftMap, null, (int) transX, 0);
         }
 
-        try {
-            String str1 = Paths.get("/home/saiful/temp/origMap1.png").toString();
-            ImageIO.write(origMap, "png", new File(str1));
-            String str2 = Paths.get("/home/saiful/temp/miniMap1.png").toString();
-            ImageIO.write(miniMap, "png", new File(str2));
-            VBASLogger.logDebug("Drawing: " + str1 + ", " + str2);
-        } catch (Exception e) {
-            VBASLogger.logSevere("Error creating a png.");
-        }
-
     }
 
     private void setGeoRange(double Lat1, double Lon1, double Lat2, double Lon2) {
 
-        //it means selection is in two regions
-        if (Lon1 > 0 && Lon2 < 0) {
-
-            for (SeisEvent ev : seisEventList.getSeisEventList()) {
+        //geoEventsNum = 0;
+        if (Lon1 > 0 && Lon2 < 0) //it means selection is in two regions
+        {
+            for (SeisEvent ev : seList.getSeisEventList()) {
                 if (ev.getLat() >= Lat1 && ev.getLat() <= Lat2 && ev.getLon() >= Lon1 && ev.getLon() <= 180 && ev.getTSelction() == true) {
                     ev.setGSelection(true);
                 } else if (ev.getLat() >= Lat1 && ev.getLat() <= Lat2 && ev.getLon() > -180 && ev.getLon() <= Lon2 && ev.getTSelction() == true) {
@@ -182,7 +174,7 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
                 }
             }
         } else {
-            for (SeisEvent ev : seisEventList.getSeisEventList()) {
+            for (SeisEvent ev : seList.getSeisEventList()) {
                 if (ev.getLat() >= Lat1 && ev.getLat() <= Lat2 && ev.getLon() >= Lon1 && ev.getLon() <= Lon2 && ev.getTSelction() == true) {
                     ev.setGSelection(true);
                 } else {
@@ -204,23 +196,32 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
         setRegionUnselection();
     }
 
+    public Double getLat1() {
+        return Lat1;
+    }
+
+    public Double getLat2() {
+        return Lat2;
+    }
+
+    public Double getLon1() {
+        return Lon1;
+    }
+
+    public Double getLon2() {
+        return Lon2;
+    }
+
     @Override
     public void paintComponent(Graphics g) {
+
         super.paintComponent(g);
 
-        Graphics2D g2 = (Graphics2D) g;//.create();
+        Graphics2D g2 = (Graphics2D) g.create();
         Paint savedPaint = g2.getPaint();
         Stroke savedStroke = g2.getStroke();
-        Dimension size = getSize();
 
-        if (notAssign) {
-            VBASLogger.logDebug("@selectedSeisEventList: " + seisEventList);
-            VBASLogger.logDebug("#selectedSeisEventList: " + seisEventList.getSeisEventList().size());
-        } else {
-            VBASLogger.logDebug("@seisEventList: " + seisEventList);
-            VBASLogger.logDebug("#seisEventList: " + seisEventList.getSeisEventList().size());
-            VBASLogger.logDebug("#seisEventList: " + GlobalStorage.getSeisEventList().getSeisEventList().size());
-        }
+        Dimension size = getSize();
 
         if (size.getWidth() > mapSize) {
             dispx = (int) (size.getWidth() - mapSize) / 2;
@@ -237,40 +238,17 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
         g2.drawImage(miniMap, dispx, dispy, (int) mapSize, (int) mapSize, this);
 
         int px, py;
-        
-        // Saiful: if text is overlaid on top of the map!
-        /*
-        if(notAssign) {
-            TaskBlock selectedTaskBlock = GlobalStorage.getSelectedTaskBlock();
-            String text = "Block: " + selectedTaskBlock.getBlockID() + ":\n"
-                + "Total events: " + selectedTaskBlock.getEventNumber() + "\n"
-                + "Total phases: " + selectedTaskBlock.getPhaseNumber() + "\n"
-                + "Status: " + selectedTaskBlock.getStatus() + " Stage.\n"
-                + "Primary analyst:" + selectedTaskBlock.getAnalyst1() + "\n"
-                + "Review planned from: " + df.format(selectedTaskBlock.getPPlanStartDay())
-                + " to " + df.format(selectedTaskBlock.getPPlanEndDay()) + "\n"
-                + "Secondary analyst: " + selectedTaskBlock.getAnalyst2() + "\n"
-                + "Review planned from: " + df.format(selectedTaskBlock.getSPlanStartDay())
-                + " to " + df.format(selectedTaskBlock.getSPlanEndDay()) + "\n"
-                + "Final analyst: " + selectedTaskBlock.getAnalyst3() + "\n"
-                + "Review planned from: " + df.format(selectedTaskBlock.getFPlanStartDay());
-            g2.setPaint(new Color(128, 128, 128, 127));
-            int x  = dispx + 10, y = dispy;
-            for (String line : text.split("\n")) {
-                g2.drawString(line, x, y += g.getFontMetrics().getHeight());
-            }
-        }*/
-        
+
         /**
          * the first time, draw all the data outside the selection
          */
         g2.setPaint(Color.DARK_GRAY);
-
-        for (SeisEvent ev : seisEventList.getSeisEventList()) {
-
-            if (ev.getTSelction() == false && ev.getGSelction() == false && ev.getblAssigned() == notAssign) {
-
-                //VBASLogger.logDebug("Color.DARK_GRAY");
+        for (SeisEvent ev : seList.getSeisEventList()) {
+            //Day currDay = new Day(ev.getOrigTime());
+            //if(startDay == null || endDay == null || currDay.compareTo(startDay)<0 || currDay.compareTo(endDay)>0)
+            if (ev.getTSelction() == false && ev.getGSelction() == false && ev.getblAssigned() == assignedFlag) {
+                //gMini.setStroke(new BasicStroke(3));               
+                //px = (int) (dispx + (OsmMercator.LonToX(ev.getLon(), 0)*scale));
                 py = (int) (dispy + (OsmMercator.LatToY(ev.getLat(), 0) * scale));
                 px = ((OsmMercator.LonToX(ev.getLon(), 0) + transX) > 0) ? (int) ((OsmMercator.LonToX(ev.getLon(), 0) + transX) * scale) : (int) ((OsmMercator.LonToX(ev.getLon(), 0) + transX + 256) * scale);
                 px = (int) (dispx + px);
@@ -281,12 +259,10 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
 
         /*Time selected but geo not*/
         g2.setPaint(Color.ORANGE);
-        for (SeisEvent ev : seisEventList.getSeisEventList()) {
+        for (SeisEvent ev : seList.getSeisEventList()) {
             //Day currDay = new Day(ev.getOrigTime());
             //if(startDay != null && endDay != null && currDay.compareTo(startDay)>=0 && currDay.compareTo(endDay)<=0)
-            if (ev.getTSelction() == true && ev.getGSelction() == false && ev.getblAssigned() == notAssign) {
-
-                //VBASLogger.logDebug("Color.ORANGE");
+            if (ev.getTSelction() == true && ev.getGSelction() == false && ev.getblAssigned() == assignedFlag) {
                 //px = (int) (dispx + (OsmMercator.LonToX(ev.getLon(), 0)*scale));
                 py = (int) (dispy + (OsmMercator.LatToY(ev.getLat(), 0) * scale));
                 px = ((OsmMercator.LonToX(ev.getLon(), 0) + transX) > 0) ? (int) ((OsmMercator.LonToX(ev.getLon(), 0) + transX) * scale) : (int) ((OsmMercator.LonToX(ev.getLon(), 0) + transX + 256) * scale);
@@ -294,17 +270,14 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
                 //g2.setPaint(Color.BLUE);
                 //g2.setStroke(new BasicStroke(3));
                 g2.fillOval(px - 2, py - 2, 5, 5);
-
             }
         }
 
         g2.setPaint(Color.GREEN);
-        for (SeisEvent ev : seisEventList.getSeisEventList()) {
+        for (SeisEvent ev : seList.getSeisEventList()) {
             //Day currDay = new Day(ev.getOrigTime());
             //if(startDay != null && endDay != null && currDay.compareTo(startDay)>=0 && currDay.compareTo(endDay)<=0)
-            if (ev.getTSelction() == true && ev.getGSelction() == true && ev.getblAssigned() == notAssign) {
-
-                //VBASLogger.logDebug("Color.GREEN");
+            if (ev.getTSelction() == true && ev.getGSelction() == true && ev.getblAssigned() == assignedFlag) {
                 //px = (int) (dispx + (OsmMercator.LonToX(ev.getLon(), 0)*scale));
                 py = (int) (dispy + (OsmMercator.LatToY(ev.getLat(), 0) * scale));
                 px = ((OsmMercator.LonToX(ev.getLon(), 0) + transX) > 0) ? (int) ((OsmMercator.LonToX(ev.getLon(), 0) + transX) * scale) : (int) ((OsmMercator.LonToX(ev.getLon(), 0) + transX + 256) * scale);
@@ -343,6 +316,11 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
         if (polySelect == true && path != null) {
             g2.draw(path);
         }
+
+        //g2.setXORMode(Color.gray);
+        //g2.setPaint(Color.GREEN);
+        //g2.draw(rect);
+        //g2.setPaintMode();
     }
 
     @Override
@@ -355,7 +333,7 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
                 path.moveTo(e.getX(), e.getY());
                 polyStart = false;
                 //set all the geoselection to false
-                for (SeisEvent ev : seisEventList.getSeisEventList()) {
+                for (SeisEvent ev : seList.getSeisEventList()) {
                     ev.setGSelection(false);
                 }
             } else if (polySelect == true && polyStart == false) {
@@ -422,6 +400,11 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
+    public void update(Observable o, Object arg) {
+        this.repaint();
+    }
+
     /**
      * helper function to set the geo selection to true if the event is in the
      * selected polygon
@@ -430,7 +413,7 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
 
         int px, py;
         //get the coordinates of each event and use path.contain
-        for (SeisEvent ev : seisEventList.getSeisEventList()) {
+        for (SeisEvent ev : seList.getSeisEventList()) {
             //lat lon to x, y
             py = (int) (OsmMercator.LatToY(ev.getLat(), 0) * scale + dispy);
             if ((OsmMercator.LonToX(ev.getLon(), 0) + transX) < 0) {

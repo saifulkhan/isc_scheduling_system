@@ -1,4 +1,3 @@
-
 package uk.ac.isc.view;
 
 import java.awt.Color;
@@ -27,235 +26,224 @@ import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.IntervalXYDataset;
+import uk.ac.isc.data.GlobalStorage;
 import uk.ac.isc.data.SeisEvent;
 import uk.ac.isc.data.SeisEventList;
 import uk.ac.isc.data.VBASLogger;
 
 /**
  *
- * This panel shows all the assigned and unassigned events number 
- * from the start date to the end date of the data load from schema
- * 
- * @author hui
+ * This panel shows all the assigned and unassigned events number from the start
+ * date to the end date of the data load from schema
  */
 public class TimelinePanel extends JPanel implements Observer {
-   
-    /** A data reference for showing the figure*/
-    private SeisEventList seList;
-    
-    /** Two variables to draw the histograms, two JFreechart object first, probably merge later*/
+
+    private final SeisEventList seisEventList;
+
+    /**
+     * Two variables to draw the histograms, two JFreechart object first,
+     * probably merge later
+     */
     JFreeChart unassignedChart;
-    
     JFreeChart assignedChart;
-    
     JFreeChart phaseChart;
-    
-    /** A flag that indicates that the buffer should be refreshed. */
+
+    /**
+     * A flag that indicates that the buffer should be refreshed.
+     */
     private boolean refreshBuffer;
 
-    /** A buffer for the rendered chart. */
+    /**
+     * A buffer for the rendered chart.
+     */
     private transient Image chartBuffer;
+    private final int chartBufferHeight = 800;
+    private final int chartBufferWidth = 500;
 
-    /** The height of the chart buffer. */
-    private final int chartBufferHeight;
-
-    /** The width of the chart buffer. */
-    private final int chartBufferWidth;
-
-    /** The chart anchor point. */
+    /**
+     * The chart anchor point.
+     */
     private Point2D anchor1, anchor2;
 
-    /** The drawing info collected the last time the chart was drawn. */
-    private final ChartRenderingInfo info1, info2;
+    /**
+     * The drawing info collected the last time the chart was drawn.
+     */
+    private final ChartRenderingInfo info1 = new ChartRenderingInfo();
+    private final ChartRenderingInfo info2 = new ChartRenderingInfo();
 
-    /** two dataset for the charts*/
+    /**
+     * two dataset for the charts
+     */
     IntervalXYDataset unassignedDataset;
-    
     IntervalXYDataset assignedDataset;
-    
     IntervalXYDataset phaseDataset;
-    
-    /** the two variable to save the selected start date and end date*/
+
+    /**
+     * the two variable to save the selected start date and end date
+     */
     Date startDate;
-    
     Date endDate;
-    
     Date selectedStartDate;
-    
     Date selectedEndDate;
-       
     Rectangle2D selectedRegion;
-    
-    public TimelinePanel(Date startDate, Date endDate, SeisEventList se)
-    {
-        this.seList = se;
-        createDatasets();
-        
-        chartBufferHeight = 800;
-        chartBufferWidth = 500;
-        
-        createChart();
-        
-        
-        VBASLogger.logDebug("startDate=" + startDate + "endDate=" + endDate);
-        
+
+    public TimelinePanel(SeisEventList seisEventList, Date startDate, Date endDate) {
+
+        this.seisEventList = seisEventList;
         this.startDate = startDate;
         this.endDate = endDate;
+
+        VBASLogger.logDebug("@seisEventList: " + seisEventList);
+        VBASLogger.logDebug("#seisEventList: " + seisEventList.getSeisEventList().size());
+        
         selectedStartDate = new Date(startDate.getTime());
         selectedEndDate = new Date(endDate.getTime());
         
-        info1 = new ChartRenderingInfo();
-        info2 = new ChartRenderingInfo();
-        //this.setSize(400, 900);
+        updateDatasets();
     }
+
     
-    public void setData(SeisEventList se)
-    {
-        this.seList = se;
+    @Override
+    public void update(Observable o, Object arg) {
+        VBASLogger.logDebug(" Update TimelinePanel...");
+        updateDatasets();
+        this.repaint();
     }
+
     
-    public void setSelectedStartDate(Date selectedStartDate)
-    {
+    public void setSelectedStartDate(Date selectedStartDate) {
         //if(this.selectedEndDate.before(selectedStartDate))
         //{
         //    this.selectedStartDate = new Date(startDate.getTime());
         //} else {
-            this.selectedStartDate = selectedStartDate;
+        this.selectedStartDate = selectedStartDate;
         //}
-        for(SeisEvent se:seList.getSeisEventList())
-        {
-            if((se.getOrigTime().after(selectedStartDate)||se.getOrigTime().equals(selectedStartDate) )&& se.getOrigTime().before(selectedEndDate))
-            {
+        for (SeisEvent se : seisEventList.getSeisEventList()) {
+            if ((se.getOrigTime().after(selectedStartDate) || se.getOrigTime().equals(selectedStartDate)) && se.getOrigTime().before(selectedEndDate)) {
                 se.setTSelection(true);
-            }
-            else
-            {
+            } else {
                 se.setTSelection(false);
             }
         }
         //System.out.println(this.selectedStartDate);
         //this.repaint();
-        seList.setChangeFlag();
-        seList.notifyObservers();
+        seisEventList.setChangeFlag();
+        seisEventList.notifyObservers();
     }
-    
-    public Date getSelectedStartDate()
-    {
+
+    public Date getSelectedStartDate() {
         return this.selectedStartDate;
     }
+
     
-    public void setSelectedEndDate(Date selectedEndDate)
-    {
+    public void setSelectedEndDate(Date selectedEndDate) {
         //if(this.selectedStartDate.after(selectedEndDate))
         //{
         //    this.selectedEndDate = new Date(endDate.getTime());
         //} else {
-            this.selectedEndDate = selectedEndDate;
+        this.selectedEndDate = selectedEndDate;
         //}
-        for(SeisEvent se:seList.getSeisEventList())
-        {
-            if(se.getOrigTime().after(selectedStartDate) && se.getOrigTime().before(selectedEndDate))
-            {
+        for (SeisEvent se : seisEventList.getSeisEventList()) {
+            if (se.getOrigTime().after(selectedStartDate) && se.getOrigTime().before(selectedEndDate)) {
                 se.setTSelection(true);
-            }
-            else
-            {
+            } else {
                 se.setTSelection(false);
             }
         }
         //System.out.println(this.selectedEndDate);
         //this.repaint();
-        seList.setChangeFlag();
-        seList.notifyObservers();
+        seisEventList.setChangeFlag();
+        seisEventList.notifyObservers();
     }
+
     
-    public Date getSelectedEndDate()
-    {
+    public Date getSelectedEndDate() {
         return this.selectedEndDate;
     }
-    
+
     /*set the data into the dataset for plotting*/
-    private void createDatasets()
-    {
+    private void updateDatasets() {
+        
+        if (seisEventList.getSeisEventList().isEmpty()) {
+            return;
+        }
+        
         TimeSeries s1 = new TimeSeries("Unassigned Events Distribution");
         TimeSeries s2 = new TimeSeries("Assigned Events Distribution");
         TimeSeries s3 = new TimeSeries("Phase data Districution");
-        
+
         int unassignedCount = 0, assignedCount = 0;
         int phaseCount = 0;
-        
-        Day curr = new Day(seList.getSeisEventList().get(0).getOrigTime());
-        
-        for (SeisEvent seisEvent : seList.getSeisEventList()) {
-            if(new Day(seisEvent.getOrigTime()).equals(curr) && seisEvent.getblAssigned()==true)
-            {
+
+        Day curr = new Day(seisEventList.getSeisEventList().get(0).getOrigTime());
+
+        for (SeisEvent seisEvent : seisEventList.getSeisEventList()) {
+            if (new Day(seisEvent.getOrigTime()).equals(curr) && seisEvent.getblAssigned() == true) {
                 assignedCount++;
                 phaseCount += seisEvent.getPhaseNumber();
-            }
-            else if(new Day(seisEvent.getOrigTime()).equals(curr) && seisEvent.getblAssigned()==false)
-            {
+            } else if (new Day(seisEvent.getOrigTime()).equals(curr) && seisEvent.getblAssigned() == false) {
                 unassignedCount++;
                 phaseCount += seisEvent.getPhaseNumber();
-            }
-            else if(!new Day(seisEvent.getOrigTime()).equals(curr)) {
+            } else if (!new Day(seisEvent.getOrigTime()).equals(curr)) {
                 s1.add(curr, unassignedCount);
                 s2.add(curr, assignedCount);
                 s3.add(curr, phaseCount);
-                
+
                 //System.out.println(phaseCount);
-                curr = (Day)curr.next();
+                curr = (Day) curr.next();
                 assignedCount = 0;
                 unassignedCount = 0;
                 phaseCount = 0;
-            } 
+            }
         }
-    
-        s1.add(curr,unassignedCount);
-        s2.add(curr,assignedCount);
+
+        s1.add(curr, unassignedCount);
+        s2.add(curr, assignedCount);
         s3.add(curr, phaseCount);
-        
+
         unassignedDataset = new TimeSeriesCollection(s1);
         assignedDataset = new TimeSeriesCollection(s2);
         phaseDataset = new TimeSeriesCollection(s3);
-        
+
+        this.updateChart();
     }
 
-    private void createChart() {
+    private void updateChart() {
 
         unassignedChart = ChartFactory.createXYBarChart(
-            "",  // title
-            "",// x-axis label   
-            true,
-            "Unassigned",   // y-axis label
-            unassignedDataset, // data
-            PlotOrientation.HORIZONTAL,
-            false,
-            false,
-            false
+                "", // title
+                "",// x-axis label   
+                true,
+                "Unassigned", // y-axis label
+                unassignedDataset, // data
+                PlotOrientation.HORIZONTAL,
+                false,
+                false,
+                false
         );
-        
+
         assignedChart = ChartFactory.createXYBarChart(
-            "",  // title
-            "",// x-axis label   
-            true,
-            "Assigned",   // y-axis label
-            assignedDataset, // data
-            PlotOrientation.HORIZONTAL,
-            false,
-            false,
-            false
+                "", // title
+                "",// x-axis label   
+                true,
+                "Assigned", // y-axis label
+                assignedDataset, // data
+                PlotOrientation.HORIZONTAL,
+                false,
+                false,
+                false
         );
-            
+
         phaseChart = ChartFactory.createXYBarChart(
-            "",  // title
-            "",// x-axis label   
-            true,
-            "Phase Number",   // y-axis label
-            phaseDataset, // data
-            PlotOrientation.HORIZONTAL,
-            false,
-            false,
-            false
+                "", // title
+                "",// x-axis label   
+                true,
+                "Phase Number", // y-axis label
+                phaseDataset, // data
+                PlotOrientation.HORIZONTAL,
+                false,
+                false,
+                false
         );
         //unassignedChart.setBackgroundPaint(Color.white);
 
@@ -270,7 +258,7 @@ public class TimelinePanel extends JPanel implements Observer {
         //plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
         //plot.setDomainCrosshairVisible(true);
         //plot.setRangeCrosshairVisible(true);
-        
+
         //XYItemRenderer r = plot.getRenderer();
         //if (r instanceof XYBarRenderer) {
         //    XYBarRenderer renderer = (XYBarRenderer) r;
@@ -280,7 +268,7 @@ public class TimelinePanel extends JPanel implements Observer {
         axis.setUpperMargin(0);
         axis.setInverted(true);
         //axis.setDateFormatOverride(new SimpleDateFormat("DD-MMM"));
-        
+
         XYPlot plot2 = (XYPlot) assignedChart.getPlot();
         plot2.setBackgroundPaint(Color.LIGHT_GRAY);
         plot2.getRenderer().setSeriesPaint(0, Color.GREEN);
@@ -293,29 +281,31 @@ public class TimelinePanel extends JPanel implements Observer {
         //plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
         //plot.setDomainCrosshairVisible(true);
         //plot.setRangeCrosshairVisible(true);
-        
+
         //XYItemRenderer r = plot.getRenderer();
         //if (r instanceof XYBarRenderer) {
         //    XYBarRenderer renderer = (XYBarRenderer) r;
         //}
-        DateAxis axis2 = (DateAxis) plot2.getDomainAxis();       
+        DateAxis axis2 = (DateAxis) plot2.getDomainAxis();
         axis2.setLowerMargin(0);
         axis2.setUpperMargin(0);
         axis2.setInverted(true);
         axis2.setVisible(false);
-        
-        XYBarRenderer renderer = (XYBarRenderer)plot.getRenderer();
+
+        XYBarRenderer renderer = (XYBarRenderer) plot.getRenderer();
         //renderer.setShadowVisible(false);
         renderer.setBarPainter(new StandardXYBarPainter());
-           
-        XYBarRenderer renderer2 = (XYBarRenderer)plot2.getRenderer();
+
+        XYBarRenderer renderer2 = (XYBarRenderer) plot2.getRenderer();
         //renderer.setShadowVisible(false);
         renderer2.setBarPainter(new StandardXYBarPainter());
-        
-        /** set the two upperbound equal to each other*/
+
+        /**
+         * set the two upperbound equal to each other
+         */
         plot.getRangeAxis().setUpperBound(Math.max(plot.getRangeAxis().getUpperBound(), plot2.getRangeAxis().getUpperBound()));
         plot2.getRangeAxis().setUpperBound(Math.max(plot.getRangeAxis().getUpperBound(), plot2.getRangeAxis().getUpperBound()));
-        
+
         /*add configurations for phase chart*/
         XYPlot plot3 = (XYPlot) phaseChart.getPlot();
         plot3.setBackgroundPaint(Color.LIGHT_GRAY);
@@ -328,31 +318,36 @@ public class TimelinePanel extends JPanel implements Observer {
         axis3.setUpperMargin(0);
         axis3.setInverted(true);
         axis3.setVisible(false);
-        XYBarRenderer renderer3 = (XYBarRenderer)plot3.getRenderer();
+        XYBarRenderer renderer3 = (XYBarRenderer) plot3.getRenderer();
         renderer3.setBarPainter(new StandardXYBarPainter());
-        
+
     }
-    
+
     /**
      * Paints the component by drawing the chart to fill the entire component,
      * but allowing for the insets (which will be non-zero if a border has been
-     * set for this component).  To increase performance (at the expense of
+     * set for this component). To increase performance (at the expense of
      * memory), an off-screen buffer image can be used.
      *
-     * @param g  the graphics device for drawing on.
+     * @param g the graphics device for drawing on.
      */
     @Override
     public void paintComponent(Graphics g) {
+
+        
+        VBASLogger.logDebug("@seisEventList: " + seisEventList);
+        VBASLogger.logDebug("#seisEventList: " + seisEventList.getSeisEventList().size());
+        
         
         super.paintComponent(g);
-        
+
         if (this.unassignedChart == null || this.assignedChart == null) {
             return;
         }
         Graphics2D g2 = (Graphics2D) g.create();
-        
+
         Color savedColor = g2.getColor();
-        
+
         // first determine the size of the chart rendering area...
         Dimension size = getSize();
         Insets insets = getInsets();
@@ -362,107 +357,97 @@ public class TimelinePanel extends JPanel implements Observer {
 
         // work out if scaling is required...
         //boolean scale = false;
-        double drawWidth = (available.getWidth()-50)/3;
+        double drawWidth = (available.getWidth() - 50) / 3;
         double drawHeight = available.getHeight();
-                
+
         Rectangle2D chartArea = new Rectangle2D.Double(0.0, 0.0, drawWidth,
                 drawHeight);
-                
-        Rectangle2D chartArea1 = new Rectangle2D.Double(drawWidth, 0.0, drawWidth+50,
+
+        Rectangle2D chartArea1 = new Rectangle2D.Double(drawWidth, 0.0, drawWidth + 50,
                 drawHeight);
-        
-        Rectangle2D chartArea2 = new Rectangle2D.Double(2*drawWidth+50, 0, drawWidth,
+
+        Rectangle2D chartArea2 = new Rectangle2D.Double(2 * drawWidth + 50, 0, drawWidth,
                 drawHeight);
-       /* if ((this.chartBuffer == null)
-                    || (this.chartBufferWidth != available.getWidth())
-                    || (this.chartBufferHeight != available.getHeight())) {
-                this.chartBufferWidth = (int) available.getWidth();
-                this.chartBufferHeight = (int) available.getHeight();
-                GraphicsConfiguration gc = g2.getDeviceConfiguration();
-                this.chartBuffer = gc.createCompatibleImage(
-                        this.chartBufferWidth, this.chartBufferHeight,
-                        Transparency.TRANSLUCENT);
-                this.refreshBuffer = true;
-            }
+        /* if ((this.chartBuffer == null)
+         || (this.chartBufferWidth != available.getWidth())
+         || (this.chartBufferHeight != available.getHeight())) {
+         this.chartBufferWidth = (int) available.getWidth();
+         this.chartBufferHeight = (int) available.getHeight();
+         GraphicsConfiguration gc = g2.getDeviceConfiguration();
+         this.chartBuffer = gc.createCompatibleImage(
+         this.chartBufferWidth, this.chartBufferHeight,
+         Transparency.TRANSLUCENT);
+         this.refreshBuffer = true;
+         }
 
-            // do we need to redraw the buffer?
-            if (this.refreshBuffer) {
+         // do we need to redraw the buffer?
+         if (this.refreshBuffer) {
 
-                this.refreshBuffer = false; // clear the flag
+         this.refreshBuffer = false; // clear the flag
 
-                Rectangle2D bufferArea = new Rectangle2D.Double(
-                        0, 0, this.chartBufferWidth, this.chartBufferHeight);
+         Rectangle2D bufferArea = new Rectangle2D.Double(
+         0, 0, this.chartBufferWidth, this.chartBufferHeight);
 
-                // make the background of the buffer clear and transparent
-                Graphics2D bufferG2 = (Graphics2D)
-                        this.chartBuffer.getGraphics();
-                Composite savedComposite = bufferG2.getComposite();
-                bufferG2.setComposite(AlphaComposite.getInstance(
-                        AlphaComposite.CLEAR, 0.0f));
-                Rectangle r = new Rectangle(0, 0, this.chartBufferWidth,
-                        this.chartBufferHeight);
-                bufferG2.fill(r);
-                bufferG2.setComposite(savedComposite);
+         // make the background of the buffer clear and transparent
+         Graphics2D bufferG2 = (Graphics2D)
+         this.chartBuffer.getGraphics();
+         Composite savedComposite = bufferG2.getComposite();
+         bufferG2.setComposite(AlphaComposite.getInstance(
+         AlphaComposite.CLEAR, 0.0f));
+         Rectangle r = new Rectangle(0, 0, this.chartBufferWidth,
+         this.chartBufferHeight);
+         bufferG2.fill(r);
+         bufferG2.setComposite(savedComposite);
                 
-                this.unassignedChart.draw(bufferG2, bufferArea, this.anchor,
-                            this.info);
+         this.unassignedChart.draw(bufferG2, bufferArea, this.anchor,
+         this.info);
 
-            // zap the buffer onto the panel...
-            g2.drawImage(this.chartBuffer, insets.left, insets.top, this);
+         // zap the buffer onto the panel...
+         g2.drawImage(this.chartBuffer, insets.left, insets.top, this);
 
-        }*/
+         }*/
         this.assignedChart.draw(g2, chartArea2, this.anchor2, this.info2);
-        
+
         this.phaseChart.draw(g2, chartArea, this.anchor1, this.info2);
-        
+
         this.unassignedChart.draw(g2, chartArea1, this.anchor1, this.info1);
-                
+
         //draw the selected rectangle, set a trasnparent layer for it
-                //define selected rectangle
+        //define selected rectangle
         double x1 = info1.getPlotInfo().getDataArea().getMinX();
         double x2 = info1.getPlotInfo().getDataArea().getMaxX();
-        
+
         //System.out.println(info1.getPlotInfo().getDataArea());
         //System.out.println(selectedStartDate.getTime());
         //System.out.println(this.unassignedChart.getXYPlot().getDomainAxisEdge());
-        
         double y1 = this.unassignedChart.getXYPlot().getDomainAxis().valueToJava2D(selectedStartDate.getTime(), info1.getPlotInfo().getDataArea(),
                 this.unassignedChart.getXYPlot().getDomainAxisEdge());
-        
+
         double y2 = this.unassignedChart.getXYPlot().getDomainAxis().valueToJava2D(selectedEndDate.getTime(), info1.getPlotInfo().getDataArea(),
                 this.unassignedChart.getXYPlot().getDomainAxisEdge());
-        
-        selectedRegion = new Rectangle2D.Double(x1,y1,(x2-x1),(y2-y1));
-        
+
+        selectedRegion = new Rectangle2D.Double(x1, y1, (x2 - x1), (y2 - y1));
+
         // redraw the zoom rectangle (if present) - if useBuffer is false,
         // we use XOR so we can XOR the rectangle away again without redrawing
         // the chart
-        g2.setColor(new Color(1f,153/255f,0.0f,0.5f));
+        g2.setColor(new Color(1f, 153 / 255f, 0.0f, 0.5f));
 
-        g2.fillRect((int)selectedRegion.getX(),(int)selectedRegion.getY(),(int)selectedRegion.getWidth(),(int)selectedRegion.getHeight());
-     
+        g2.fillRect((int) selectedRegion.getX(), (int) selectedRegion.getY(), (int) selectedRegion.getWidth(), (int) selectedRegion.getHeight());
+
         g2.setColor(savedColor);
         //drawZoomRectangle(g2, !this.useBuffer);
 
         //g2.dispose();
-
     }
 
-    @Override
-    public void update(Observable o, Object arg) {
-        
-        createDatasets();
-        createChart();
-        
-        this.repaint();
-        // new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    /** Helper classes*/
+    /**
+     * Helper classes
+     */
     /**
      * Translates a Java2D point on the chart to a screen location.
      *
-     * @param java2DPoint  the Java2D point.
+     * @param java2DPoint the Java2D point.
      *
      * @return The screen location.
      */
@@ -476,8 +461,7 @@ public class TimelinePanel extends JPanel implements Observer {
     /**
      * Translates a panel (component) location to a Java2D point.
      *
-     * @param screenPoint  the screen location (<code>null</code> not
-     *                     permitted).
+     * @param screenPoint the screen location (<code>null</code> not permitted).
      *
      * @return The Java2D coordinates.
      */
@@ -487,7 +471,5 @@ public class TimelinePanel extends JPanel implements Observer {
         double y = (screenPoint.getY() - insets.top);
         return new Point2D.Double(x, y);
     }
-    
-    
 
 }

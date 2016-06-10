@@ -1,4 +1,3 @@
-
 package uk.ac.isc.view;
 
 import java.awt.Dimension;
@@ -10,30 +9,30 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.UIManager;
+import uk.ac.isc.data.GlobalStorage;
 import uk.ac.isc.data.SeisEvent;
 import uk.ac.isc.data.SeisEventList;
 import uk.ac.isc.data.SeisEventsDAO;
-import uk.ac.isc.data.TaskBlock;
 import uk.ac.isc.data.VBASLogger;
 
 public class BlockTablePopupmenu implements ActionListener {
 
-    private final JTable table;
+    private final JTable blockTable;
     private final BlockTableModel blockTableModel;
     private final SeisEventList seisEventList;
-        
+
     private final JPopupMenu popupMenu;
 
-    public BlockTablePopupmenu(JTable table, BlockTableModel blockTableModel, SeisEventList seisEventList) {
+    public BlockTablePopupmenu(JTable bt, BlockTableModel btModel, SeisEventList seList) {
 
-        this.seisEventList = seisEventList;
-        this.table = table;
-        this.blockTableModel = blockTableModel;
+        this.seisEventList = seList;
+        this.blockTable = bt;
+        this.blockTableModel = btModel;
 
         popupMenu = new JPopupMenu();
         setMenuAttributes();
     }
-    
+
     private void setMenuAttributes() {
 
         JMenuItem menuItem_delete = new JMenuItem("Delete");
@@ -46,15 +45,25 @@ public class BlockTablePopupmenu implements ActionListener {
         popupMenu.add(menuItem_done);
         menuItem_done.addActionListener(this);
 
+        /*
         JMenuItem menuItem_split = new JMenuItem("Split");
         menuItem_split.setFont(new Font("Sans-serif", Font.PLAIN, 14));
         popupMenu.add(menuItem_split);
         menuItem_split.addActionListener(this);
 
+        
+        JMenuItem menuItem_reassign = new JMenuItem("Reassign");
+        menuItem_reassign.setFont(new Font("Sans-serif", Font.PLAIN, 14));
+        popupMenu.add(menuItem_reassign);
+        menuItem_reassign.addActionListener(this);
+        
+        // get rid of Merge
         JMenuItem menuItem_merge = new JMenuItem("Merge");
         menuItem_merge.setFont(new Font("Sans-serif", Font.PLAIN, 14));
         popupMenu.add(menuItem_merge);
         menuItem_merge.addActionListener(this);
+        
+        */
 
     }
 
@@ -84,12 +93,11 @@ public class BlockTablePopupmenu implements ActionListener {
 
             case "Done":
                 doneBlock();
-                JOptionPane.showMessageDialog(null, "Done command will be added in next version.",
-                        "Warning", JOptionPane.WARNING_MESSAGE);
                 break;
 
             default:
-                JOptionPane.showMessageDialog(null, "case: default \n Incorrect command, report to system admin!",
+                JOptionPane.showMessageDialog(null,
+                        "switch -> case: default \nIncorrect command, report to system admin.",
                         "Error", JOptionPane.ERROR_MESSAGE);
                 break;
 
@@ -97,97 +105,68 @@ public class BlockTablePopupmenu implements ActionListener {
     }
 
     private void deleteBlock() {
-        
-        // selected block
-        int blockID = blockTableModel.getTaskBlockArray().get(table.getSelectedRow()).getBlockID();
-        String blockStatus = blockTableModel.getTaskBlockArray().get(table.getSelectedRow()).getStatus();
-        
-        UIManager.put("OptionPane.minimumSize", new Dimension(50, 50));
-        VBASLogger.logDebug("blockStatus="  +blockStatus);
 
-        if ("S".equals(blockStatus) || "F".equals(blockStatus)) {
+        int bid = blockTableModel.getTaskBlockArray().get(blockTable.getSelectedRow()).getBlockID();
+        String status = blockTableModel.getTaskBlockArray().get(blockTable.getSelectedRow()).getStatus();
+
+        UIManager.put("OptionPane.minimumSize", new Dimension(50, 50));
+
+        if ("S".equals(status) || "F".equals(status)) {
             JOptionPane.showMessageDialog(null,
-                    "The block is under review, hence cannot be deleted.\n"
-                    + "Please contact with the system administrator for more information.",
+                    "The block has been reviewed which cannot be deleted.\n"
+                    + "Please contact with the system administrator for more options",
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         } else {
-            
-            int result = JOptionPane.showConfirmDialog(null, "Do you really want to delete the selected block?");
+            int result = JOptionPane.showConfirmDialog(null, 
+                    "Do you really want to delete the selected block?",
+                    null, JOptionPane.YES_NO_OPTION);
 
-            if (result == JOptionPane.OK_OPTION) {
-                SeisEventsDAO.deleteBlock(blockID);
-                blockTableModel.reload();
-                
-                SeisEventsDAO.retrieveBlockEventNumber(blockTableModel.getTaskBlockArray());
-                SeisEventsDAO.retrieveBlockReviewedEventNumber(blockTableModel.getTaskBlockArray());
-                table.setModel(blockTableModel);
+            if (result == JOptionPane.YES_OPTION) {
+                SeisEventsDAO.deleteBlock(bid);
 
-                if (blockTableModel.getTaskBlockArray().size() > 0) {
-                
-                    // reload the phase number
-                    for (TaskBlock tb : blockTableModel.getTaskBlockArray()) {
-                        tb.setPhaseNumber(0);
-                    }
-
-                    for (SeisEvent se : seisEventList.getSeisEventList()) {
-                        if (se.getBlockID() != null) {
-                            for (TaskBlock tb : blockTableModel.getTaskBlockArray()) {
-                                if (tb.getBlockID().equals(se.getBlockID())) {
-                                    tb.setPhaseNumber(tb.getPhaseNumber() + se.getPhaseNumber());
-                                }
-                            }
-
-                        }
-                    }
-                } else {
-                    return;
-                }
-
-                for (SeisEvent se : seisEventList.getSeisEventList()) {
-                    if (se.getBlockID() != null && se.getBlockID() == blockID) {
-                        se.setblAssigned(false);
-                        se.setBlockID(null);
-                    }
-                }
-
-                JOptionPane.showMessageDialog(null, "The selected block is deleted!");
-            }
-            
-            table.updateUI();
-            
-            //SK
-            /*
-            blockInfoPanel.getAnalystView().updateBlocks();
-            blockInfoPanel.getBlockView().repaint();*/
-                    
-            if (blockTableModel.getTaskBlockArray().size() > 0) {
-                table.setRowSelectionInterval(0, 0);
-                blockID = (int) table.getValueAt(0, 0);
+            } else {
+                return;
             }
 
+            for (SeisEvent se : seisEventList.getSeisEventList()) {
+                if (se.getBlockID() != null && se.getBlockID() == bid) {
+                    se.setblAssigned(false);
+                    se.setBlockID(null);
+                }
+            }
+            
+            JOptionPane.showMessageDialog(null, "The selected block is deleted!");
+            GlobalStorage.loadData();
         }
     }
 
     private void splitBlock() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        JOptionPane.showMessageDialog(null,
+                "Split command will be added in next version.",
+                "Warning", JOptionPane.WARNING_MESSAGE);
     }
 
     private void mergeBlocks() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        JOptionPane.showMessageDialog(null,
+                "Merge command will be added in next version.",
+                "Warning", JOptionPane.WARNING_MESSAGE);
     }
 
     private void reassignBlock() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        JOptionPane.showMessageDialog(null,
+                "Reassign command will be added in next version.",
+                "Warning", JOptionPane.WARNING_MESSAGE);
     }
 
     private void doneBlock() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        JOptionPane.showMessageDialog(null,
+                "Done command will be added in next version.",
+                "Warning", JOptionPane.WARNING_MESSAGE);
     }
 
     public JPopupMenu getPopupMenu() {
         return popupMenu;
     }
-    
-    
+
 }

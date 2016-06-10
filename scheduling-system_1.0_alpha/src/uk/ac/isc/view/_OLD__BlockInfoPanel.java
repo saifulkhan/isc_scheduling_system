@@ -17,7 +17,7 @@ import uk.ac.isc.data.SeisEventsDAO;
  *
  * @author hui
  */
-public class BlockInfoPanel extends JPanel implements TableModelListener {
+public class _OLD__BlockInfoPanel extends JPanel implements TableModelListener {
 
     /**
      * data ref to keep the seisevents and blocks
@@ -45,7 +45,7 @@ public class BlockInfoPanel extends JPanel implements TableModelListener {
 
     private final JSplitPane infoPane;
 
-    public BlockInfoPanel(BlockTableModel btm, JTable btable) {
+    public _OLD__BlockInfoPanel(BlockTableModel btm, JTable btable) {
         this.blockTableModel = btm;
         this.blockTable = btable;
 

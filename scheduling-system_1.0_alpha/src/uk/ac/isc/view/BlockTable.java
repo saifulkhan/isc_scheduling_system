@@ -5,11 +5,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.JPanel;
@@ -19,87 +14,54 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import uk.ac.isc.data.SeisEvent;
+import uk.ac.isc.data.GlobalStorage;
 import uk.ac.isc.data.SeisEventList;
-import uk.ac.isc.data.SeisEventsDAO;
 import uk.ac.isc.data.TaskBlock;
 import uk.ac.isc.data.TaskBlockList;
 import uk.ac.isc.data.VBASLogger;
 
 public class BlockTable extends JPanel implements Observer {
 
-    private final TaskBlockList taskBlockList;
-    private final TaskBlock selectedTaskBlock;
     private final SeisEventList seisEventList;
     private final SeisEventList selectedSeisEventList;
-
-    private final HashMap<Integer, Integer> allocatedEvID = new HashMap<>();
-    private HashSet<TaskBlock> blockSet;
+    private final TaskBlockList taskBlockList;
+    private final TaskBlock selectedTaskBlock;
 
     private JTable table = null;
     private BlockTableModel blockTableModel = null;
     private BlockTablePopupmenu blockTablePopupmenu = null;
     private ListSelectionListener listSelectionListener = null;
+    private JScrollPane scrollPane = new JScrollPane();
 
-    private JScrollPane scrollPane = new JScrollPane();;
+   
+    public BlockTable(SeisEventList seisEventList,
+            SeisEventList selectedSeisEventList,
+            TaskBlockList taskBlockList,
+            TaskBlock selectedTaskBlock) {
 
-    public BlockTable(TaskBlockList taskBlockList,
-            TaskBlock selectedTaskBlock,
-            SeisEventList allSeisEventList,
-            SeisEventList selectedSeisEventList) {
-
+        this.seisEventList = seisEventList;
+        this.selectedSeisEventList = selectedSeisEventList;
         this.taskBlockList = taskBlockList;
         this.selectedTaskBlock = selectedTaskBlock;
-        this.seisEventList = allSeisEventList;
-        this.selectedSeisEventList = selectedSeisEventList;
 
-        updateData();
-        updateTable();
+        this.updateTable();
     }
 
-    private void updateData() {
-
-        blockSet = new HashSet<>();
-        taskBlockList.getTaskBlockList().clear();
-
-        //load the block table from the database
-        SeisEventsDAO.loadBlocks(blockSet);
-        taskBlockList.getTaskBlockList().addAll(blockSet);
-        Collections.sort(taskBlockList.getTaskBlockList());
-
-        // fill in the events number
-        Boolean ret = SeisEventsDAO.retrieveBlockEventNumber(taskBlockList.getTaskBlockList());
-        ret = SeisEventsDAO.retrieveBlockReviewedEventNumber(taskBlockList.getTaskBlockList());
-
-        // load the events
-        ret = SeisEventsDAO.retrieveAllEvents(seisEventList.getSeisEventList());
-        ret = SeisEventsDAO.retrieveAllocatedEvID(allocatedEvID);
-
-        // initialize the phase number of blocks = 0
-        for (TaskBlock tb : taskBlockList.getTaskBlockList()) {
-            tb.setPhaseNumber(0);
-        }
-
-        for (SeisEvent se : seisEventList.getSeisEventList()) {
-
-            if (allocatedEvID.containsKey(se.getEvid())) {
-                se.setblAssigned(true);
-                se.setBlockID(allocatedEvID.get(se.getEvid()));
-                for (TaskBlock tb : taskBlockList.getTaskBlockList()) {
-                    if (Objects.equals(tb.getBlockID(), allocatedEvID.get(se.getEvid()))) {
-                        tb.setPhaseNumber(tb.getPhaseNumber() + se.getPhaseNumber());
-                    }
-                }
-            }
-        }
-
+    @Override
+    public void update(Observable o, Object o1) {
+        VBASLogger.logDebug("Upadte the BlockTable...");
+        this.updateTable();
     }
 
     private void updateTable() {
 
+        VBASLogger.logDebug("@seisEventList: " + seisEventList);
+        VBASLogger.logDebug("#seisEventList: " + seisEventList.getSeisEventList().size());
+
         table = new JTable();
-        table.setSelectionBackground(Color.gray);
-        
+        table.setSelectionBackground(Color.GRAY);
+        table.setSelectionForeground(Color.WHITE);
+
         listSelectionListener = new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent lse) {
@@ -108,7 +70,7 @@ public class BlockTable extends JPanel implements Observer {
                 }
             }
         };
-        
+
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent evt) {
@@ -122,38 +84,33 @@ public class BlockTable extends JPanel implements Observer {
         blockTableModel = new BlockTableModel(taskBlockList.getTaskBlockList());
         table.setModel(blockTableModel);
         table.getSelectionModel().addListSelectionListener(listSelectionListener);
-        
-        blockTablePopupmenu = new BlockTablePopupmenu(table, blockTableModel, selectedSeisEventList);
+
+        blockTablePopupmenu = new BlockTablePopupmenu(table, blockTableModel, seisEventList);
 
         scrollPane.setViewportView(table);
         scrollPane.repaint();
-        
-        // select the first row
+
+        // Select first row
         if (taskBlockList.getTaskBlockList().size() > 0) {
             table.setRowSelectionInterval(0, 0);
+
+        } else { // BloackTable is empty
+            GlobalStorage.setSelectedTaskBlock(new TaskBlock()); // No or empty selected TaskBlock
+            GlobalStorage.setSelectedSeisEventList(); // No or empty Selected SeisEventList
         }
     }
 
-    
+    /*
+     * New row is selected: Chenage selectedTaskBlock and selectedSeisEventList data.
+     */
     public void onValueChanged(ListSelectionEvent e) {
-
-        VBASLogger.logDebug("Here...");
+        VBASLogger.logDebug("Chenage selected block.");
 
         int blockId = (Integer) table.getValueAt(table.getSelectedRow(), 0);
-              
-        SeisEventList blockEvents = new SeisEventList();
-        for (SeisEvent se : seisEventList.getSeisEventList()) {
-            if (se.getBlockID() != null && se.getBlockID().equals(blockId)) {
-                selectedSeisEventList.getSeisEventList().add(se);
-            }
-        }
-        selectedSeisEventList.setChangeFlag();
-        selectedSeisEventList.notifyObservers();
-        
-        selectedTaskBlock.setTaskBlock(blockTableModel.getTaskBlockArray().get(table.getSelectedRow()));
-        selectedTaskBlock.setChangeFlag();
-        selectedTaskBlock.notifyObservers();
-       
+        GlobalStorage.setSelectedSeisEventList(blockId);
+
+        TaskBlock selectedTaskBlock = blockTableModel.getTaskBlockArray().get(table.getSelectedRow());
+        GlobalStorage.setSelectedTaskBlock(selectedTaskBlock);
     }
 
     private void onMouseClicked(MouseEvent e) {
@@ -168,8 +125,7 @@ public class BlockTable extends JPanel implements Observer {
         // Specify the condition(s) you want for htPopupManager display.
         // For Example: show htPopupManager only if a row & column is selected.
         if (selectedRow >= 0 && selectedCol >= 0) {
-            VBASLogger.logDebug("selectedRow=" + selectedRow
-                    + ", selectedCol=" + selectedCol);
+            VBASLogger.logDebug("selectedRow=" + selectedRow);
 
             Point p = e.getPoint();
             final int row = table.rowAtPoint(p);
@@ -183,15 +139,7 @@ public class BlockTable extends JPanel implements Observer {
         }
     }
 
-    @Override
-    public void update(Observable o, Object o1) {
-        VBASLogger.logDebug(" Upadting the Block data...");
-        VBASLogger.logDebug(" Upadting the BlockTable...");
-        this.updateData();
-        this.updateTable();
-    }
-
     public JScrollPane getScrollBlockTable() {
-        return scrollBlockTable;
+        return scrollPane;
     }
 }

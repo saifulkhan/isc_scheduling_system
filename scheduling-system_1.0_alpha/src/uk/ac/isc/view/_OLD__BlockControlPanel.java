@@ -33,7 +33,7 @@ import uk.ac.isc.data.TaskBlock;
  * 
  * @author hui
  */
-public class BlockControlPanel_OLD extends JPanel {
+public class _OLD__BlockControlPanel extends JPanel {
    
     /** Here are the data*/
     private final Date startDate;
@@ -71,9 +71,9 @@ public class BlockControlPanel_OLD extends JPanel {
     private final ButtonGroup bg = new ButtonGroup();
     
     /*referenct to blockinfo panel for setting the flags*/
-    private final BlockInfoPanel blockInfoPanel;
+    private final _OLD__BlockInfoPanel blockInfoPanel;
     
-    public BlockControlPanel_OLD(Date startDate, Date endDate, SeisEventList seisEventList, BlockInfoPanel blockInfoPanel)
+    public _OLD__BlockControlPanel(Date startDate, Date endDate, SeisEventList seisEventList, _OLD__BlockInfoPanel blockInfoPanel)
     {
         this.startDate = startDate;
         this.endDate = endDate;
@@ -109,7 +109,7 @@ public class BlockControlPanel_OLD extends JPanel {
         newButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                AssignMainPanel amp = new AssignMainPanel(startDate, endDate, seisEventList);
+                AssignPanel amp = new AssignPanel(startDate, endDate);
                 String[] options = {"OK"};
                 UIManager.put("OptionPane.minimumSize", new Dimension(1400,850));
                 int result = JOptionPane.showOptionDialog(null, amp, "Create Blocks by grouping unassigned events", 

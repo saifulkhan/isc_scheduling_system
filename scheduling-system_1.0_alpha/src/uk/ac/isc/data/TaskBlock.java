@@ -34,7 +34,6 @@ public class TaskBlock extends Observable implements Comparable<TaskBlock> {
     private Date fPlanEndDay;
 
     public TaskBlock() {
-
     }
 
     public TaskBlock(Integer bid) {

@@ -215,7 +215,7 @@ public class SeisEventsDAO {
         VBASLogger.logDebug("SeisEventsDAO::retrieveAllEvents");
 
         //clear the memory of seisEvent in order to reload events
-        if (seisEvents.size() > 0) { 
+        if (seisEvents.size() > 0) {
             seisEvents.clear();
         }
 
@@ -674,51 +674,57 @@ public class SeisEventsDAO {
         int allocID1 = 0, allocID2 = 0, allocID3 = 0;
         int selectID = 0;
         int regionID = 0;
-        System.out.println("Entering the create block function successfully.");
+
+        String query;
 
         try {
             con = DriverManager.getConnection(url, user, password);
             con.setAutoCommit(false);
-
             st = con.createStatement();
-            rs = st.executeQuery("SELECT NEXTID('selectid','block');");
+            query = "SELECT NEXTID('selectid','block');";
+
+            VBASLogger.logDebug("query: " + query);
+            rs = st.executeQuery(query);
+
             if (rs.next()) {
                 selectID = rs.getInt(1);
             }
             rs.close();
-            System.out.println("Getting a selectID successfully");
+            //System.out.println("Getting a selectID successfully");
 
-            //st = con.createStatement();
-            rs = st.executeQuery("SELECT NEXTID('region_id','block');");
+            query = "SELECT NEXTID('region_id','block');";
+            VBASLogger.logDebug("query: " + query);
+            rs = st.executeQuery(query);
             if (rs.next()) {
                 regionID = rs.getInt(1);
             }
             rs.close();
-            System.out.println(regionID);
+            //System.out.println(regionID);
 
             /*update block table*/
-            //st = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             PreparedStatement st1 = con.prepareStatement("INSERT INTO block VALUES (?,?,?,?,?)");
             st1.setInt(1, blockID);
             st1.setInt(2, selectID);
             st1.setTimestamp(3, new Timestamp(startDay.getTime()));
             st1.setTimestamp(4, new Timestamp(endDay.getTime()));
             st1.setInt(5, regionID);
+
             try {
                 st1.executeUpdate();
             } catch (SQLException ex) {
                 System.out.println("Fail to insert block row.");
             }
 
-            //con.commit();
-            //rs.close();
+    
+            
             /*update first row of blockallocation the p pass*/
             rs = st.executeQuery("SELECT NEXTID('id','block_allocation');");
             while (rs.next()) {
                 allocID1 = rs.getInt(1);
             }
             rs.close();
-            System.out.println(allocID1);
+            
+            //System.out.println(allocID1);
 
             String sql2 = "INSERT INTO block_allocation "
                     + "(id, block_id, analyst_id, pass, planned_start, planned_finish, review) "
@@ -898,6 +904,7 @@ public class SeisEventsDAO {
         return true;
     }
 
+    
     /**
      * The set
      *

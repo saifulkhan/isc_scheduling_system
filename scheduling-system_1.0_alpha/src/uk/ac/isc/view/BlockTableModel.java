@@ -1,13 +1,14 @@
 package uk.ac.isc.view;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import javax.swing.table.AbstractTableModel;
-import uk.ac.isc.data.SeisEventsDAO;
 import uk.ac.isc.data.TaskBlock;
 
 public class BlockTableModel extends AbstractTableModel {
+
+    private final ArrayList<TaskBlock> taskBlockArray;
+    private final SimpleDateFormat df = new SimpleDateFormat("dd-MM-yy");
 
     private final String[] columnNames = {"Block ID.",
         "Start Date",
@@ -17,8 +18,8 @@ public class BlockTableModel extends AbstractTableModel {
         "Analyst 2",
         "Analyst 3",
         "Status",
-        "Events Num.",
-        "Reviewed Number"};
+        "#SeisEvents",
+        "#Reviewed"};
 
     private final Class[] columns = new Class[]{Integer.class,
         String.class,
@@ -29,40 +30,11 @@ public class BlockTableModel extends AbstractTableModel {
         String.class,
         String.class,
         Integer.class,
-        Integer.class};
-
-    private final ArrayList<TaskBlock> taskBlockArray;
-    //private HashSet<TaskBlock> blockSet;
+        Integer.class
+    };
 
     public BlockTableModel(ArrayList<TaskBlock> taskBlockArray) {
         this.taskBlockArray = taskBlockArray;
-        /*
-        blockSet = new HashSet<>();
-        //load the block table from the database
-        SeisEventsDAO.loadBlocks(blockSet);
-        taskBlockArray = new ArrayList<>(blockSet);
-        Collections.sort(taskBlockArray);
-
-        //System.out.println(taskBlockArray);
-                */
-    }
-
-    public void reload() {
-        /*
-        blockSet = new HashSet<>();
-        taskBlockArray.clear();
-
-        //load the block table from the database
-        SeisEventsDAO.loadBlocks(blockSet);
-        taskBlockArray.addAll(blockSet);
-        Collections.sort(taskBlockArray);
-
-        SeisEventsDAO.retrieveBlockEventNumber(taskBlockArray);
-        SeisEventsDAO.retrieveBlockReviewedEventNumber(taskBlockArray);
-
-        //this.fireTableDataChanged();
-        
-        */
     }
 
     public ArrayList<TaskBlock> getTaskBlockArray() {
@@ -87,9 +59,10 @@ public class BlockTableModel extends AbstractTableModel {
         if (columnIndex == 0) {
             retObject = taskBlockArray.get(rowIndex).getBlockID();
         } else if (columnIndex == 1) {
-            retObject = taskBlockArray.get(rowIndex).getStartDay().toString();
+            retObject = df.format(taskBlockArray.get(rowIndex).getStartDay());
+            //retObject = taskBlockArray.get(rowIndex).getStartDay().toString();
         } else if (columnIndex == 2) {
-            retObject = taskBlockArray.get(rowIndex).getEndDay().toString();
+            retObject = df.format(taskBlockArray.get(rowIndex).getEndDay());
         } else if (columnIndex == 3) {
             retObject = taskBlockArray.get(rowIndex).getRegionID();
         } else if (columnIndex == 4) {

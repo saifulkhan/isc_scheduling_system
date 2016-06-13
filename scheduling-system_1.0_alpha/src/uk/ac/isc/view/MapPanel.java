@@ -23,7 +23,6 @@ import org.openstreetmap.gui.jmapviewer.OsmMercator;
 import uk.ac.isc.data.GlobalStorage;
 import uk.ac.isc.data.SeisEvent;
 import uk.ac.isc.data.SeisEventList;
-import uk.ac.isc.data.TaskBlock;
 import uk.ac.isc.data.VBASLogger;
 
 /**
@@ -91,7 +90,7 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
         VBASLogger.logDebug(" Update MapPanel... " + "notAssign=" + notAssign);
         this.removeAll();
         this.updateUI();
-        
+
         this.repaint();
     }
 
@@ -155,16 +154,16 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
             g2.drawImage(leftMap, null, (int) transX, 0);
         }
 
-        try {
-            String str1 = Paths.get("/home/saiful/temp/origMap1.png").toString();
-            ImageIO.write(origMap, "png", new File(str1));
-            String str2 = Paths.get("/home/saiful/temp/miniMap1.png").toString();
-            ImageIO.write(miniMap, "png", new File(str2));
-            VBASLogger.logDebug("Drawing: " + str1 + ", " + str2);
-        } catch (Exception e) {
-            VBASLogger.logSevere("Error creating a png.");
-        }
-
+        // for debug
+        /*try {
+         String str1 = Paths.get("/home/saiful/temp/origMap1.png").toString();
+         ImageIO.write(origMap, "png", new File(str1));
+         String str2 = Paths.get("/home/saiful/temp/miniMap1.png").toString();
+         ImageIO.write(miniMap, "png", new File(str2));
+         VBASLogger.logDebug("Drawing: " + str1 + ", " + str2);
+         } catch (Exception e) {
+         VBASLogger.logSevere("Error creating a png.");
+         }*/
     }
 
     private void setGeoRange(double Lat1, double Lon1, double Lat2, double Lon2) {
@@ -237,30 +236,29 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
         g2.drawImage(miniMap, dispx, dispy, (int) mapSize, (int) mapSize, this);
 
         int px, py;
-        
+
         // Saiful: if text is overlaid on top of the map!
         /*
-        if(notAssign) {
-            TaskBlock selectedTaskBlock = GlobalStorage.getSelectedTaskBlock();
-            String text = "Block: " + selectedTaskBlock.getBlockID() + ":\n"
-                + "Total events: " + selectedTaskBlock.getEventNumber() + "\n"
-                + "Total phases: " + selectedTaskBlock.getPhaseNumber() + "\n"
-                + "Status: " + selectedTaskBlock.getStatus() + " Stage.\n"
-                + "Primary analyst:" + selectedTaskBlock.getAnalyst1() + "\n"
-                + "Review planned from: " + df.format(selectedTaskBlock.getPPlanStartDay())
-                + " to " + df.format(selectedTaskBlock.getPPlanEndDay()) + "\n"
-                + "Secondary analyst: " + selectedTaskBlock.getAnalyst2() + "\n"
-                + "Review planned from: " + df.format(selectedTaskBlock.getSPlanStartDay())
-                + " to " + df.format(selectedTaskBlock.getSPlanEndDay()) + "\n"
-                + "Final analyst: " + selectedTaskBlock.getAnalyst3() + "\n"
-                + "Review planned from: " + df.format(selectedTaskBlock.getFPlanStartDay());
-            g2.setPaint(new Color(128, 128, 128, 127));
-            int x  = dispx + 10, y = dispy;
-            for (String line : text.split("\n")) {
-                g2.drawString(line, x, y += g.getFontMetrics().getHeight());
-            }
-        }*/
-        
+         if(notAssign) {
+         TaskBlock selectedTaskBlock = GlobalStorage.getSelectedTaskBlock();
+         String text = "Block: " + selectedTaskBlock.getBlockID() + ":\n"
+         + "Total events: " + selectedTaskBlock.getEventNumber() + "\n"
+         + "Total phases: " + selectedTaskBlock.getPhaseNumber() + "\n"
+         + "Status: " + selectedTaskBlock.getStatus() + " Stage.\n"
+         + "Primary analyst:" + selectedTaskBlock.getAnalyst1() + "\n"
+         + "Review planned from: " + df.format(selectedTaskBlock.getPPlanStartDay())
+         + " to " + df.format(selectedTaskBlock.getPPlanEndDay()) + "\n"
+         + "Secondary analyst: " + selectedTaskBlock.getAnalyst2() + "\n"
+         + "Review planned from: " + df.format(selectedTaskBlock.getSPlanStartDay())
+         + " to " + df.format(selectedTaskBlock.getSPlanEndDay()) + "\n"
+         + "Final analyst: " + selectedTaskBlock.getAnalyst3() + "\n"
+         + "Review planned from: " + df.format(selectedTaskBlock.getFPlanStartDay());
+         g2.setPaint(new Color(128, 128, 128, 127));
+         int x  = dispx + 10, y = dispy;
+         for (String line : text.split("\n")) {
+         g2.drawString(line, x, y += g.getFontMetrics().getHeight());
+         }
+         }*/
         /**
          * the first time, draw all the data outside the selection
          */
@@ -348,7 +346,8 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
     @Override
     public void mouseClicked(MouseEvent e) {
 
-        //System.out.println(e.getX());
+        System.out.println(e.getX());
+        
         if (e.getClickCount() == 1) {
             if (polySelect == true && polyStart == true) {
                 path = new Path2D.Double();
@@ -364,10 +363,8 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
 
         } else if (e.getClickCount() == 2) {
             path.closePath();
-            //now set the selection flags
             setGeoSelection();
             polyStart = true;
-            //this.repaint();
         }
 
         this.repaint();
@@ -383,7 +380,6 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
             Lon1 = OsmMercator.XToLon((int) (leftX / scale - transX), 0) > 180 ? OsmMercator.XToLon((int) (leftX / scale - transX), 0) - 360 : OsmMercator.XToLon((int) (leftX / scale - transX), 0);
             tempLat = OsmMercator.YToLat((int) ((e.getY() - dispy) / scale), 0);
         }
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -409,17 +405,14 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
             }
             //System.out.println(Lon1+" "+ Lon2 + " "+ Lat1 + " "+Lat2);
         }
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+   }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     /**
@@ -427,7 +420,6 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
      * selected polygon
      */
     private void setGeoSelection() {
-
         int px, py;
         //get the coordinates of each event and use path.contain
         for (SeisEvent ev : seisEventList.getSeisEventList()) {
@@ -438,12 +430,10 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
             } else {
                 px = (int) ((OsmMercator.LonToX(ev.getLon(), 0) + transX) * scale + dispx);
             }
-
             if (path.contains(px, py)) {
                 ev.setGSelection(true);
             }
         }
-
     }
 
 }

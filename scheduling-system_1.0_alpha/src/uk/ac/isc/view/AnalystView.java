@@ -58,19 +58,17 @@ public class AnalystView extends JPanel implements Observer {
     public AnalystView(ArrayList<Analyst> aList, ArrayList<TaskBlock> bList) {
         this.analystList = aList;
         this.bList = bList;
-        
-        this.updateBlocks(); 
+
+        this.updateBlocks();
     }
 
-    
     @Override
     public void update(Observable o, Object o1) {
         VBASLogger.logDebug(" Upadting the AnalystView chart...");
         updateBlocks();
         this.repaint();
     }
-    
-    
+
     @Override
     protected void paintComponent(Graphics g) {
 
@@ -165,10 +163,9 @@ public class AnalystView extends JPanel implements Observer {
                         dataset.addValue(bList.get(j).getReviewedEventNumber(), rowKey1, columnKey);
 
                         dataset.addValue(bList.get(j).getEventNumber() - bList.get(j).getReviewedEventNumber(), rowKey2, columnKey);
-                    } else //done
-                    {
+                    } else {
+                        //done
                         dataset.addValue(bList.get(j).getEventNumber(), rowKey1, columnKey);
-
                         dataset.addValue(0, rowKey2, columnKey);
                     }
                 }
@@ -185,7 +182,7 @@ public class AnalystView extends JPanel implements Observer {
                     //System.out.println(dataset.getRowKey(row));
                     //System.out.println(dataset.getColumnKey(col));
                     if (dataset.getRowKey(row) == "unreviewed") {
-                        return new Color(128, 128, 128);
+                        return Color.BLACK;
                     } else {
                         String flag = ((String) dataset.getColumnKey(col)).substring(((String) dataset.getColumnKey(col)).length() - 1);
                         //System.out.println(flag);

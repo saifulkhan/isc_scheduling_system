@@ -715,17 +715,14 @@ public class SeisEventsDAO {
                 System.out.println("Fail to insert block row.");
             }
 
-    
-            
             /*update first row of blockallocation the p pass*/
             rs = st.executeQuery("SELECT NEXTID('id','block_allocation');");
             while (rs.next()) {
                 allocID1 = rs.getInt(1);
             }
             rs.close();
-            
-            //System.out.println(allocID1);
 
+            //System.out.println(allocID1);
             String sql2 = "INSERT INTO block_allocation "
                     + "(id, block_id, analyst_id, pass, planned_start, planned_finish, review) "
                     + "VALUES (?,?,?,?,?,?,?)";
@@ -904,7 +901,6 @@ public class SeisEventsDAO {
         return true;
     }
 
-    
     /**
      * The set
      *
@@ -1272,7 +1268,6 @@ public class SeisEventsDAO {
     }
 
     public static boolean loadBlocks(HashSet<TaskBlock> blockSet) {
-        VBASLogger.logDebug("Here...");
 
         //clear the memory of blockArray in order to reload events
         //blockArray.clear();
@@ -1381,7 +1376,6 @@ public class SeisEventsDAO {
 
         } catch (SQLException ex) {
             String message = ex.toString() + "\n\n"
-                    + VBASLogger.debugAt()
                     + "\nFailed to load Blocks from database."
                     + "\nSee the error log file for more information. ";
 
@@ -1552,6 +1546,35 @@ public class SeisEventsDAO {
         }
 
         return true;
+    }
+
+    public static Boolean doneBlock(int blockId) {
+
+        Connection con = null;
+        Statement st = null;
+        String query = null;
+
+        query = "UPDATE block_allocation SET review = 1 WHERE id = " + blockId;
+        VBASLogger.logDebug("query= " + query);
+
+        try {
+            con = DriverManager.getConnection(url, user, password);
+            con.setAutoCommit(false);
+            st = con.createStatement();
+            st.executeUpdate(query);
+            con.commit();
+        } catch (SQLException ex) {
+            String message = ex.toString() + "\n\n"
+                    + "\nFailed to update the block as done."
+                    + "\nPlease contact the system administrator. ";
+
+            JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
+            VBASLogger.logSevere(message + ", query:" + query);
+            return false;
+        }
+
+        return true;
+
     }
 
 }

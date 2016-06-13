@@ -205,6 +205,7 @@ public class AssignControlPanel extends JPanel {
         rectSetButton = new JRadioButton("Rectangle");
         rectSetButton.setSelected(true);
         polySetButton = new JRadioButton("Polygon");
+        //polySetButton.setEnabled(false);
 
         rectSetButton.addActionListener(new ActionListener() {
             @Override

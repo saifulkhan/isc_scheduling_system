@@ -22,6 +22,8 @@ public class BlockTablePopupmenu implements ActionListener {
     private final SeisEventList seisEventList;
 
     private final JPopupMenu popupMenu;
+    private Integer bid = null;
+    private String status = null;
 
     public BlockTablePopupmenu(JTable bt, BlockTableModel btModel, SeisEventList seList) {
 
@@ -46,25 +48,24 @@ public class BlockTablePopupmenu implements ActionListener {
         menuItem_done.addActionListener(this);
 
         /*
-        JMenuItem menuItem_split = new JMenuItem("Split");
-        menuItem_split.setFont(new Font("Sans-serif", Font.PLAIN, 14));
-        popupMenu.add(menuItem_split);
-        menuItem_split.addActionListener(this);
+         JMenuItem menuItem_split = new JMenuItem("Split");
+         menuItem_split.setFont(new Font("Sans-serif", Font.PLAIN, 14));
+         popupMenu.add(menuItem_split);
+         menuItem_split.addActionListener(this);
 
         
-        JMenuItem menuItem_reassign = new JMenuItem("Reassign");
-        menuItem_reassign.setFont(new Font("Sans-serif", Font.PLAIN, 14));
-        popupMenu.add(menuItem_reassign);
-        menuItem_reassign.addActionListener(this);
+         JMenuItem menuItem_reassign = new JMenuItem("Reassign");
+         menuItem_reassign.setFont(new Font("Sans-serif", Font.PLAIN, 14));
+         popupMenu.add(menuItem_reassign);
+         menuItem_reassign.addActionListener(this);
         
-        // get rid of Merge
-        JMenuItem menuItem_merge = new JMenuItem("Merge");
-        menuItem_merge.setFont(new Font("Sans-serif", Font.PLAIN, 14));
-        popupMenu.add(menuItem_merge);
-        menuItem_merge.addActionListener(this);
+         // get rid of Merge
+         JMenuItem menuItem_merge = new JMenuItem("Merge");
+         menuItem_merge.setFont(new Font("Sans-serif", Font.PLAIN, 14));
+         popupMenu.add(menuItem_merge);
+         menuItem_merge.addActionListener(this);
         
-        */
-
+         */
     }
 
     /*
@@ -74,6 +75,9 @@ public class BlockTablePopupmenu implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         System.out.println(VBASLogger.debugAt());
 
+        bid = blockTableModel.getTaskBlockArray().get(blockTable.getSelectedRow()).getBlockID();
+        status = blockTableModel.getTaskBlockArray().get(blockTable.getSelectedRow()).getStatus();
+
         switch (e.getActionCommand()) {
             case "Delete":
                 deleteBlock();
@@ -81,10 +85,6 @@ public class BlockTablePopupmenu implements ActionListener {
 
             case "Split":
                 splitBlock();
-                break;
-
-            case "Merge":
-                mergeBlocks();
                 break;
 
             case "Reassign":
@@ -106,10 +106,6 @@ public class BlockTablePopupmenu implements ActionListener {
 
     private void deleteBlock() {
 
-        int bid = blockTableModel.getTaskBlockArray().get(blockTable.getSelectedRow()).getBlockID();
-        String status = blockTableModel.getTaskBlockArray().get(blockTable.getSelectedRow()).getStatus();
-
-        UIManager.put("OptionPane.minimumSize", new Dimension(50, 50));
 
         if ("S".equals(status) || "F".equals(status)) {
             JOptionPane.showMessageDialog(null,
@@ -118,27 +114,55 @@ public class BlockTablePopupmenu implements ActionListener {
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         } else {
-            int result = JOptionPane.showConfirmDialog(null, 
+            int result = JOptionPane.showConfirmDialog(null,
                     "Do you really want to delete the selected block?",
                     null, JOptionPane.YES_NO_OPTION);
 
             if (result == JOptionPane.YES_OPTION) {
                 SeisEventsDAO.deleteBlock(bid);
+                JOptionPane.showMessageDialog(null, "The selected block is deleted!");
+                GlobalStorage.loadData();
 
-            } else {
-                return;
-            }
+            } 
 
+            /*
             for (SeisEvent se : seisEventList.getSeisEventList()) {
                 if (se.getBlockID() != null && se.getBlockID() == bid) {
                     se.setblAssigned(false);
                     se.setBlockID(null);
                 }
-            }
-            
-            JOptionPane.showMessageDialog(null, "The selected block is deleted!");
-            GlobalStorage.loadData();
+            }*/
         }
+    
+        bid = null;
+        status = null;
+    }
+
+    private void doneBlock() {
+        
+        UIManager.put("OptionPane.minimumSize", new Dimension(50, 50));
+
+        if ("P".equals(status) || "S".equals(status)) {
+            JOptionPane.showMessageDialog(null,
+                    "The block has been reviewed which cannot be deleted.\n"
+                    + "Please contact the system administrator for more options",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+
+        } else {
+            int result = JOptionPane.showConfirmDialog(null,
+                    "Is this block really done?",
+                    null, JOptionPane.YES_NO_OPTION);
+
+            if (result == JOptionPane.YES_OPTION) {
+                SeisEventsDAO.doneBlock(bid);
+                JOptionPane.showMessageDialog(null, "The selected block is done!");
+                GlobalStorage.loadData();
+            }
+        }
+        
+        bid = null;
+        status = null;
     }
 
     private void splitBlock() {
@@ -147,21 +171,9 @@ public class BlockTablePopupmenu implements ActionListener {
                 "Warning", JOptionPane.WARNING_MESSAGE);
     }
 
-    private void mergeBlocks() {
-        JOptionPane.showMessageDialog(null,
-                "Merge command will be added in next version.",
-                "Warning", JOptionPane.WARNING_MESSAGE);
-    }
-
     private void reassignBlock() {
         JOptionPane.showMessageDialog(null,
                 "Reassign command will be added in next version.",
-                "Warning", JOptionPane.WARNING_MESSAGE);
-    }
-
-    private void doneBlock() {
-        JOptionPane.showMessageDialog(null,
-                "Done command will be added in next version.",
                 "Warning", JOptionPane.WARNING_MESSAGE);
     }
 

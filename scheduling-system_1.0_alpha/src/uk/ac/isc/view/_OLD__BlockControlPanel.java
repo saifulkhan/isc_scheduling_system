@@ -124,7 +124,7 @@ public class _OLD__BlockControlPanel extends JPanel {
                         se.setGSelection(false);
                     }
                     
-                    blockInfoPanel.getBlockTableModel().reload();
+                    //blockInfoPanel.getBlockTableModel().reload();
                     SeisEventsDAO.retrieveBlockEventNumber(blockInfoPanel.getBlockTableModel().getTaskBlockArray());
                     SeisEventsDAO.retrieveBlockReviewedEventNumber(blockInfoPanel.getBlockTableModel().getTaskBlockArray());
                     
@@ -375,7 +375,7 @@ public class _OLD__BlockControlPanel extends JPanel {
                         }
                         
                                             
-                        blockInfoPanel.getBlockTableModel().reload();
+                        //blockInfoPanel.getBlockTableModel().reload();
                         SeisEventsDAO.retrieveBlockEventNumber(blockInfoPanel.getBlockTableModel().getTaskBlockArray());
                         SeisEventsDAO.retrieveBlockReviewedEventNumber(blockInfoPanel.getBlockTableModel().getTaskBlockArray());
                     
@@ -455,7 +455,7 @@ public class _OLD__BlockControlPanel extends JPanel {
                     
                         SeisEventsDAO.updateBlock(tb);
                         
-                        blockInfoPanel.getBlockTableModel().reload();
+                        //blockInfoPanel.getBlockTableModel().reload();
                         
                         blockInfoPanel.getBlockTable().updateUI();
                         blockInfoPanel.getAnalystView().updateBlocks();
@@ -500,7 +500,7 @@ public class _OLD__BlockControlPanel extends JPanel {
                         //}
                         //biPanel.getBlockTableModel().fireTableRowsDeleted(bid, bid);
                         //should update the views by reload the table model?
-                        blockInfoPanel.getBlockTableModel().reload();
+                        //blockInfoPanel.getBlockTableModel().reload();
                         SeisEventsDAO.retrieveBlockEventNumber(blockInfoPanel.getBlockTableModel().getTaskBlockArray());
                         SeisEventsDAO.retrieveBlockReviewedEventNumber(blockInfoPanel.getBlockTableModel().getTaskBlockArray());
                         blockInfoPanel.getBlockTable().setModel(blockInfoPanel.getBlockTableModel());

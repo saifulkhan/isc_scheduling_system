@@ -116,6 +116,7 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
             this.Lon1 = null;
             this.Lon2 = null;
             path = null;
+            polyStart = true;
         }
 
         this.repaint();
@@ -346,7 +347,7 @@ public class MapPanel extends JPanel implements MouseListener, Observer {
     @Override
     public void mouseClicked(MouseEvent e) {
 
-        System.out.println(e.getX());
+       VBASLogger.logDebug(e.getX() + ", " + e.getY());
         
         if (e.getClickCount() == 1) {
             if (polySelect == true && polyStart == true) {

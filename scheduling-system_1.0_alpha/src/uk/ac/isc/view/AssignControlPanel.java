@@ -27,11 +27,8 @@ import uk.ac.isc.data.VBASLogger;
  */
 public class AssignControlPanel extends JPanel {
 
- 
     private final SeisEventList seisEventList;
-    
     private BlockTableModel btModel = null;
-
     /* a reference to the timeline panel*/
     private final TimelinePanel timelinePanel;
     /* a reference to the map panel in order to change states in map seleciton*/
@@ -54,8 +51,7 @@ public class AssignControlPanel extends JPanel {
     private JTextField fromHourText = new JTextField("00:00");
     private JTextField toHourText = new JTextField("23:59");
 
- 
-    private final JLabel mapShapeLabel = new JLabel("  Map selection:");
+    private final JLabel mapShapeLabel = new JLabel("  Map-selection:");
     private final JRadioButton rectSetButton;
     private final JRadioButton polySetButton;
 
@@ -65,17 +61,16 @@ public class AssignControlPanel extends JPanel {
     private final JButton createButton;
 
     public AssignControlPanel(TimelinePanel tp, MapPanel mp, SeisEventList seisEventList, Date startDate, Date endDate) {
-        
+
         this.seisEventList = seisEventList;
         this.timelinePanel = tp;
         this.mapPanel = mp;
 
         VBASLogger.logDebug("@seisEventList: " + seisEventList);
         VBASLogger.logDebug("#seisEventList: " + seisEventList.getSeisEventList().size());
-        
+
         //this.startDate = startDate;
         //this.endDate = endDate;
-
         dtPickerFrom = new DateHourPickerPanel(startDate);
         dtPickerTo = new DateHourPickerPanel(endDate);
 
@@ -86,7 +81,6 @@ public class AssignControlPanel extends JPanel {
         dtPickerTo.getMonthView().setLowerBound(startDate);
         dtPickerTo.getMonthView().setUpperBound(endDate);
 
-        
         fromHourText.setEditable(false);
         toHourText.setEditable(false);
 
@@ -103,10 +97,8 @@ public class AssignControlPanel extends JPanel {
         dtPickerFrom.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //setSelectedStartDate(dtPickerFrom.getSelectDay());
                 mapPanel.setRegionUnselection();
 
-                //setSpinnerModelFromDate(dtPickerFrom.getSelectDay());
                 Date exactTime = dtPickerFrom.getSelectDay();
                 exactTime.setHours(0);
 
@@ -133,12 +125,15 @@ public class AssignControlPanel extends JPanel {
                     fromHourText.setText("00:00");
                 }
 
+                /*
                 if (exactTime.after(dtPickerTo.getDate())) {
                     UIManager.put("OptionPane.minimumSize", new Dimension(50, 50));
-                    JOptionPane.showMessageDialog(null, "Selected start date is after the end Date, it will be re-assigned to the initial start date");
-                    exactTime = new Date(startDate.getTime());
-                }
-                //System.out.println("setStartTime"+exactTime);
+                    JOptionPane.showMessageDialog(null, "Now please select a end date after the start date.");
+                    //dtPickerTo.setDate(new Date(endDate.getDate()));
+                }*/
+                
+                
+                
                 setSelectedStartDate(exactTime);
                 dtPickerFrom.setDate(exactTime);
             }
@@ -184,11 +179,12 @@ public class AssignControlPanel extends JPanel {
                     exactTime = DateUtils.addSeconds(exactTime, 1);
                 }
 
+                /*
                 if (exactTime.before(dtPickerFrom.getDate())) {
                     UIManager.put("OptionPane.minimumSize", new Dimension(50, 50));
-                    JOptionPane.showMessageDialog(null, "Selected end date is before the start date, it will be re-assigned to the initial end date");
-                    exactTime = new Date(endDate.getTime());
-                }
+                    JOptionPane.showMessageDialog(null, "Warning: selected end date is before the start date!");
+                    //exactTime = new Date(endDate.getTime());
+                }*/
 
                 //System.out.println("setEndTime"+exactTime);
                 setSelectedEndDate(exactTime);
@@ -240,7 +236,7 @@ public class AssignControlPanel extends JPanel {
 
         /**
          * ********************************************************************
-         * Button: Create Block 
+         * Button: Create Block
          * ********************************************************************
          */
         createButton = new JButton("Create Block");
@@ -251,6 +247,16 @@ public class AssignControlPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
 
+                
+                if (dtPickerFrom.getDate().after(dtPickerTo.getDate())) {
+                    UIManager.put("OptionPane.minimumSize", new Dimension(50, 50));
+                    JOptionPane.showMessageDialog(createButton, "Please select a end date after the start date.");
+                    return;
+                    //dtPickerTo.setDate(new Date(endDate.getDate()));
+                }
+                
+                
+                
                 /*get selection number*/
                 int tSelNum = 0, gSelNum = 0;
                 for (SeisEvent ev : seisEventList.getSeisEventList()) {
@@ -262,9 +268,7 @@ public class AssignControlPanel extends JPanel {
                     }
                 }
 
-                
                 /*get a option panel to decide the block building based on time or geo*/
-
                 String str;
 
                 if (gSelNum > 0) {
@@ -277,7 +281,9 @@ public class AssignControlPanel extends JPanel {
                 AssignDialogPanel myPanel = new AssignDialogPanel(str);
 
                 UIManager.put("OptionPane.minimumSize", new Dimension(100, 50));
-                int result = JOptionPane.showConfirmDialog(null, myPanel, "Select Creation Mode", JOptionPane.OK_CANCEL_OPTION);
+                int result = JOptionPane.showConfirmDialog(createButton, myPanel, 
+                        "Create a Block", JOptionPane.OK_CANCEL_OPTION);
+                
                 if (result == JOptionPane.OK_OPTION) {
 
                     /*get the block id from database first*/
@@ -331,9 +337,9 @@ public class AssignControlPanel extends JPanel {
                     }
 
                     if (commitSuccess == true) {
-                        JOptionPane.showMessageDialog(null,
+                        JOptionPane.showMessageDialog(mapPanel,
                                 "A block is successfully created.",
-                                "Success", JOptionPane.OK_OPTION);
+                                "Success", JOptionPane.INFORMATION_MESSAGE);
 
                     } else {
                         JOptionPane.showMessageDialog(null,
@@ -342,7 +348,7 @@ public class AssignControlPanel extends JPanel {
                     }
 
                     // reload all data
-                     GlobalStorage.loadData();
+                    GlobalStorage.loadData();
                 }
 
             }

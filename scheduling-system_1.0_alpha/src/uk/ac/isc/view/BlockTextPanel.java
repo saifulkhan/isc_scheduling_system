@@ -41,6 +41,8 @@ public class BlockTextPanel extends JPanel implements Observer {
     void updateText() {
 
         String text;
+        
+        VBASLogger.logDebug("selectedTaskBlock:" + selectedTaskBlock.toString());
 
         if (selectedTaskBlock.getBlockID() == null) {
             text = "No Taskblock Assigned Yet!";
@@ -53,10 +55,16 @@ public class BlockTextPanel extends JPanel implements Observer {
                     + "Primary review planned from: " + df.format(selectedTaskBlock.getPPlanStartDay())
                     + " to " + df.format(selectedTaskBlock.getPPlanEndDay()) + "\n"
                     + "Secondary analyst: " + selectedTaskBlock.getAnalyst2() + "\n"
-                    + "Secondary review planned from: " + df.format(selectedTaskBlock.getSPlanStartDay())
-                    + " to " + df.format(selectedTaskBlock.getSPlanEndDay()) + "\n"
+                    + "Secondary review planned from: "
+                    + (selectedTaskBlock.getSPlanStartDay() == null
+                            ? "" : df.format(selectedTaskBlock.getSPlanStartDay()))
+                    + " to "
+                    + (selectedTaskBlock.getSPlanEndDay() == null
+                            ? "" : df.format(selectedTaskBlock.getSPlanEndDay())) + "\n"
                     + "Final analyst: " + selectedTaskBlock.getAnalyst3() + "\n"
-                    + "Final review planned from: " + df.format(selectedTaskBlock.getFPlanStartDay());
+                    + "Final review planned from: "
+                    + (selectedTaskBlock.getFPlanStartDay() == null
+                            ? "" : df.format(selectedTaskBlock.getFPlanStartDay()));
         }
         //VBASLogger.logDebug("text:" + text);
 

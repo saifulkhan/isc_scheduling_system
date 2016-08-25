@@ -250,7 +250,26 @@ public class TaskBlock extends Observable implements Comparable<TaskBlock> {
 
     @Override
     public String toString() {
-        return this.blockID.toString();
+        return this.blockID + ", "
+        + this.startDay + ", "
+        + this.endDay + ", "
+        + this.regionID + ", "
+        + this.analyst1ID + ", "
+        + this.analyst2ID + ", "
+        + this.analyst3ID + ", "
+        + this.analyst1 + ", "
+        + this.analyst2 + ", "
+        + this.analyst3 + ", "
+        + this.reviewStatus + ", "
+        + this.eventNumber + ", "
+        + this.reviewedNumber + ", "
+        + this.totalPhaseNumber + ", "
+        + this.pPlanStartDay + ", "
+        + this.pPlanEndDay + ", "
+        + this.sPlanStartDay + ", "
+        + this.sPlanEndDay + ", "
+        + this.fPlanStartDay + ", "
+        + this.fPlanEndDay;
     }
 
     @Override

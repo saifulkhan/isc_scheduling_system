@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.logging.Level;
 import javax.swing.JOptionPane;
 
 /**
@@ -30,12 +29,15 @@ public class SeisEventsDAO {
      */
     static {
         Map<String, String> env = System.getenv();
-        url = "jdbc:postgresql://" + env.get("PGHOSTADDR") + ":" + env.get("PGPORT") + "/" + env.get("PGDATABASE");
-        user = env.get("PGUSER_SCHEDULAR");
-        password = env.get("PGPASSWORD_SCHEDULAR");
+        url = "jdbc:postgresql://" 
+                + env.get("PGHOSTADDR") + ":" 
+                + env.get("PGPORT") + "/" 
+                + env.get("PGDATABASE");
+        user = env.get("PGUSER");
+        password = env.get("PGPASSWORD");
+        //user = env.get("PGUSER_SCHEDULAR");
+        //password = env.get("PGPASSWORD_SCHEDULAR");
         //url = "jdbc:postgresql://127.0.0.1:5432/isc";
-        //user = "hui";
-        //password = "njustga";
     }
 
     /**

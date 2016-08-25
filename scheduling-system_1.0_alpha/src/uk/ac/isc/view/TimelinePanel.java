@@ -95,14 +95,13 @@ public class TimelinePanel extends JPanel implements Observer {
 
         VBASLogger.logDebug("@seisEventList: " + seisEventList);
         VBASLogger.logDebug("#seisEventList: " + seisEventList.getSeisEventList().size());
-        
+
         selectedStartDate = new Date(startDate.getTime());
         selectedEndDate = new Date(endDate.getTime());
-        
+
         updateDatasets();
     }
 
-    
     @Override
     public void update(Observable o, Object arg) {
         VBASLogger.logDebug(" Update TimelinePanel...");
@@ -110,7 +109,6 @@ public class TimelinePanel extends JPanel implements Observer {
         this.repaint();
     }
 
-    
     public void setSelectedStartDate(Date selectedStartDate) {
         //if(this.selectedEndDate.before(selectedStartDate))
         //{
@@ -135,7 +133,6 @@ public class TimelinePanel extends JPanel implements Observer {
         return this.selectedStartDate;
     }
 
-    
     public void setSelectedEndDate(Date selectedEndDate) {
         //if(this.selectedStartDate.after(selectedEndDate))
         //{
@@ -156,18 +153,17 @@ public class TimelinePanel extends JPanel implements Observer {
         seisEventList.notifyObservers();
     }
 
-    
     public Date getSelectedEndDate() {
         return this.selectedEndDate;
     }
 
     /*set the data into the dataset for plotting*/
     private void updateDatasets() {
-        
+
         if (seisEventList.getSeisEventList().isEmpty()) {
             return;
         }
-        
+
         TimeSeries s1 = new TimeSeries("Unassigned Events Distribution");
         TimeSeries s2 = new TimeSeries("Assigned Events Distribution");
         TimeSeries s3 = new TimeSeries("Phase data Districution");
@@ -238,23 +234,28 @@ public class TimelinePanel extends JPanel implements Observer {
                 "", // title
                 "",// x-axis label   
                 true,
-                "Phase Number", // y-axis label
+                "Number of Phases", // y-axis label
                 phaseDataset, // data
                 PlotOrientation.HORIZONTAL,
                 false,
                 false,
                 false
         );
-        //unassignedChart.setBackgroundPaint(Color.white);
+        //unassignedChart. (Color.white);
 
+        
+        /*
+         * un-assigned 
+        */
+        
         XYPlot plot = (XYPlot) unassignedChart.getPlot();
-        plot.setBackgroundPaint(Color.LIGHT_GRAY);
+        plot.setBackgroundPaint(Color.WHITE);
         plot.getRenderer().setSeriesPaint(0, Color.DARK_GRAY);
         plot.setDomainAxisLocation(AxisLocation.BOTTOM_OR_RIGHT);
         plot.setRangeAxisLocation(AxisLocation.TOP_OR_RIGHT);
         plot.getRangeAxis().setInverted(true);
-        //plot.setDomainGridlinePaint(Color.white);
-        //plot.setRangeGridlinePaint(Color.white);
+        plot.setDomainGridlinePaint(Color.GRAY);
+        plot.setRangeGridlinePaint(Color.GRAY);
         //plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
         //plot.setDomainCrosshairVisible(true);
         //plot.setRangeCrosshairVisible(true);
@@ -269,9 +270,14 @@ public class TimelinePanel extends JPanel implements Observer {
         axis.setInverted(true);
         //axis.setDateFormatOverride(new SimpleDateFormat("DD-MMM"));
 
+        /*
+         * Assigned 
+        */
         XYPlot plot2 = (XYPlot) assignedChart.getPlot();
-        plot2.setBackgroundPaint(Color.LIGHT_GRAY);
-        plot2.getRenderer().setSeriesPaint(0, Color.GREEN);
+        plot2.setBackgroundPaint(Color.WHITE);
+        plot2.setDomainGridlinePaint(Color.GRAY);
+        plot2.setRangeGridlinePaint(Color.GRAY);
+        plot2.getRenderer().setSeriesPaint(0, new Color(0, 163, 0));
         plot2.setDomainAxisLocation(AxisLocation.BOTTOM_OR_LEFT);
         plot2.setRangeAxisLocation(AxisLocation.TOP_OR_RIGHT);
         //plot2.getRangeAxis().setInverted(true);
@@ -306,10 +312,17 @@ public class TimelinePanel extends JPanel implements Observer {
         plot.getRangeAxis().setUpperBound(Math.max(plot.getRangeAxis().getUpperBound(), plot2.getRangeAxis().getUpperBound()));
         plot2.getRangeAxis().setUpperBound(Math.max(plot.getRangeAxis().getUpperBound(), plot2.getRangeAxis().getUpperBound()));
 
+        
+        /*
+         * Phase number 
+        */
+        
         /*add configurations for phase chart*/
         XYPlot plot3 = (XYPlot) phaseChart.getPlot();
-        plot3.setBackgroundPaint(Color.LIGHT_GRAY);
-        plot3.getRenderer().setSeriesPaint(0, Color.DARK_GRAY);
+        plot3.setBackgroundPaint(Color.WHITE);
+        plot3.setDomainGridlinePaint(Color.GRAY);
+        plot3.setRangeGridlinePaint(Color.GRAY);
+        plot3.getRenderer().setSeriesPaint(0, new Color(126, 56, 120));
         plot3.setDomainAxisLocation(AxisLocation.BOTTOM_OR_RIGHT);
         plot3.setRangeAxisLocation(AxisLocation.TOP_OR_RIGHT);
         plot3.getRangeAxis().setInverted(true);
@@ -334,11 +347,9 @@ public class TimelinePanel extends JPanel implements Observer {
     @Override
     public void paintComponent(Graphics g) {
 
-        
         VBASLogger.logDebug("@seisEventList: " + seisEventList);
         VBASLogger.logDebug("#seisEventList: " + seisEventList.getSeisEventList().size());
-        
-        
+
         super.paintComponent(g);
 
         if (this.unassignedChart == null || this.assignedChart == null) {

@@ -182,7 +182,7 @@ public class AnalystView extends JPanel implements Observer {
                     //System.out.println(dataset.getRowKey(row));
                     //System.out.println(dataset.getColumnKey(col));
                     if (dataset.getRowKey(row) == "unreviewed") {
-                        return Color.BLACK;
+                        return Color.DARK_GRAY;
                     } else {
                         String flag = ((String) dataset.getColumnKey(col)).substring(((String) dataset.getColumnKey(col)).length() - 1);
                         //System.out.println(flag);

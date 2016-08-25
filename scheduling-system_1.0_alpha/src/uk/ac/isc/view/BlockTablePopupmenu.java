@@ -108,19 +108,20 @@ public class BlockTablePopupmenu implements ActionListener {
 
 
         if ("S".equals(status) || "F".equals(status)) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(blockTable,
                     "The block has been reviewed which cannot be deleted.\n"
                     + "Please contact with the system administrator for more options",
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         } else {
-            int result = JOptionPane.showConfirmDialog(null,
+            int result = JOptionPane.showConfirmDialog(blockTable,
                     "Do you really want to delete the selected block?",
                     null, JOptionPane.YES_NO_OPTION);
 
             if (result == JOptionPane.YES_OPTION) {
                 SeisEventsDAO.deleteBlock(bid);
-                JOptionPane.showMessageDialog(null, "The selected block is deleted!");
+                JOptionPane.showMessageDialog(blockTable, "The selected block is deleted.", 
+                        "success", JOptionPane.INFORMATION_MESSAGE);
                 GlobalStorage.loadData();
 
             } 
@@ -144,7 +145,7 @@ public class BlockTablePopupmenu implements ActionListener {
 
         if ("P".equals(status) || "S".equals(status)) {
             JOptionPane.showMessageDialog(null,
-                    "The block has been reviewed which cannot be deleted.\n"
+                    "The block has been reviewed which cannot be marked as done.\n"
                     + "Please contact the system administrator for more options",
                     "Error",
                     JOptionPane.ERROR_MESSAGE);

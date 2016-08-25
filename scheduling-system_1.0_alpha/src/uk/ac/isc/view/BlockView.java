@@ -47,9 +47,16 @@ public class BlockView extends JPanel implements Observer {
 
     @Override
     protected void paintComponent(Graphics g) {
-
+         
         super.paintComponent(g);
         this.setBackground(Color.WHITE);
+        
+        // Issue #7 
+        if(taskBlockList.isEmpty()) {
+           VBASLogger.logDebug( "taskBlockList is empty. Return.");
+           return;
+        }
+                      
         Graphics2D g2 = (Graphics2D) g.create();
         Dimension dim = getSize();  // dynamically set the dimension of this component.
         Paint savedColor = g2.getPaint();
@@ -59,18 +66,19 @@ public class BlockView extends JPanel implements Observer {
         int gapY = 50;
         int offset1 = 10;
 
+        maxEventNumber = 0;
         for (TaskBlock tb : taskBlockList) {
             if (tb.getEventNumber() > maxEventNumber) {
                 maxEventNumber = tb.getEventNumber();
             }
         }
 
-        VBASLogger.logDebug("Barchart: height=" + dim.getHeight() + ", width=" + dim.getWidth());
-        //blockHeight = (int) (dim.getHeight() / (taskBlockList.size() * 3 + 2));
-        //blockInterval = barH * 2;
-
-        barH = ((int) dim.getHeight() - (gapY * taskBlockList.size() + 2 * gapY))
-                / taskBlockList.size();
+        VBASLogger.logDebug("Barchart: height=" + dim.getHeight() 
+                + ", width=" + dim.getWidth()
+                + ", taskBlockList.size()=" + taskBlockList.size());
+        
+        barH = ((int) dim.getHeight() - 2 * gapY)
+                / (2 * taskBlockList.size());
 
         // TODO: check this?
         if (maxEventNumber > 0 && dim.getWidth() > 300) {
@@ -134,7 +142,8 @@ public class BlockView extends JPanel implements Observer {
             // label: block ID
             g2.setPaint(Color.GRAY);
             String label = "Block:" + taskBlockList.get(i).getBlockID();
-            TextUtilities.drawRotatedString(label, g2, (int) xB - offset1, (int) yB,
+            TextUtilities.drawRotatedString(label, g2, 
+                    (int) xB - offset1, (int) yB +  g.getFontMetrics().getHeight() / 2,
                     org.jfree.ui.TextAnchor.CENTER_RIGHT, 0, org.jfree.ui.TextAnchor.BOTTOM_CENTER);
 
             // if the block is done, draw it white
@@ -156,7 +165,7 @@ public class BlockView extends JPanel implements Observer {
                 g2.fill(reviewedBar);
 
                 // draw unreviewed event bar
-                g2.setPaint(Color.BLACK);
+                g2.setPaint(Color.DARK_GRAY);
                 g2.fill(unreviewedBar);
             }
 
@@ -165,18 +174,18 @@ public class BlockView extends JPanel implements Observer {
             dateEndLabel = df.format(taskBlockList.get(i).getPPlanEndDay());
 
             TextUtilities.drawRotatedString(dateStartLabel, g2,
-                    (int) (xB - offset1), (int) (yB + barH / 2),
+                    (int) (xB - offset1), (int) (yB + barH / 2 +  g.getFontMetrics().getHeight() / 2),
                     org.jfree.ui.TextAnchor.CENTER_RIGHT, 0, org.jfree.ui.TextAnchor.CENTER);
 
             TextUtilities.drawRotatedString(dateEndLabel, g2,
-                    (int) (xB + width1 + width2 + offset1), (int) (yB + barH / 2),
+                    (int) (xB + width1 + width2 + offset1), (int) (yB + barH / 2 + +  g.getFontMetrics().getHeight() / 2),
                     org.jfree.ui.TextAnchor.CENTER_LEFT, 0, org.jfree.ui.TextAnchor.CENTER);
 
             TextUtilities.drawRotatedString("Phases:" + String.valueOf(taskBlockList.get(i).getPhaseNumber()), g2,
-                    (int) (xB + width1 + width2 + offset1), (int) (yB),
+                    (int) (xB + width1 + width2 + offset1), (int) (yB  +  g.getFontMetrics().getHeight() / 2),
                     org.jfree.ui.TextAnchor.CENTER_LEFT, 0, org.jfree.ui.TextAnchor.CENTER);
 
-            yB = yB + barH + gapY;
+            yB = yB + 2 * barH ;
         }
 
     }

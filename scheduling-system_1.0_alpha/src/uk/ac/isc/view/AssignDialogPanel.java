@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Date;
+import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -16,14 +17,12 @@ import uk.ac.isc.data.SeisEventsDAO;
  *
  * @author hui
  */
-public class AssignDialogPanel extends javax.swing.JPanel {
+public class AssignDialogPanel extends JPanel {
 
     ArrayList<Analyst> analysts = new ArrayList<>();
     
     Date pStartDate, pEndDate;
-    
     Date sStartDate, sEndDate;
-    
     Date fStartDate, fEndDate;
     
     /**

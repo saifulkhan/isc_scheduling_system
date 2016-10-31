@@ -15,7 +15,7 @@ import uk.ac.isc.data.SeisEventsDAO;
 
 /**
  *
- * @author hui
+ *  
  */
 public class AssignDialogPanel extends JPanel {
 

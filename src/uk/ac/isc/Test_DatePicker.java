@@ -21,7 +21,7 @@ import org.jdesktop.swingx.JXDatePicker;
 
 /**
  *
- * @author hui
+ *  
  */
 public class Test_DatePicker {
     

@@ -12,7 +12,7 @@ import uk.ac.isc.data.VBASLogger;
 
 /**
  *
- * @author hui
+ *  
  */
 public class BlockTextPanel extends JPanel implements Observer {
 

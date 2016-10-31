@@ -23,7 +23,7 @@ import uk.ac.isc.data.SeisEventList;
 /**
  * This panel is for selecting events on the map and manipulating
  *
- * @author hui
+ *  
  */
 public class _OLD_MapPanel extends JPanel implements MouseListener, Observer {
 

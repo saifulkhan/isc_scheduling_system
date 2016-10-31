@@ -6,7 +6,7 @@ import uk.ac.isc.data.SeisEventsDAO;
 
 /**
  *
- * @author hui
+ *  
  */
 public class EmailPanel extends JPanel {
 

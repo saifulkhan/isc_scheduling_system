@@ -27,7 +27,7 @@ import uk.ac.isc.data.SeisEventList;
  * this panel has several buttons to control the information showing in the
  * figures in the blockinfopanel and activate the assignment panel.
  *
- * @author hui
+ *  
  */
 public class BlockControlPanel extends JPanel {
 

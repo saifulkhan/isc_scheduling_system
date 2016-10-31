@@ -3,7 +3,7 @@ package uk.ac.isc.data;
 
 /**
  *
- * @author hui
+ *  
  */
 public class Analyst {
     

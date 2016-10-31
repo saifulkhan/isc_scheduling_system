@@ -12,7 +12,7 @@ import uk.ac.isc.data.SeisEventList;
 /**
  * This is the one to pick up a day in the calendar and update linked panel to show
  * the hour view for picking the exact time
- * @author hui
+ *  
  */
 public class DateHourPickerPanel extends JXDatePicker {
     

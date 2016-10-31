@@ -31,7 +31,7 @@ import uk.ac.isc.data.TaskBlock;
  * this panel has several buttons to control the information showing
  * in the figures in the blockinfopanel and activate the assignment panel.
  * 
- * @author hui
+ *  
  */
 public class _OLD__BlockControlPanel extends JPanel {
    

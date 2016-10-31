@@ -15,7 +15,7 @@ import uk.ac.isc.data.SeisEventsDAO;
  * This is the panel to have the table of the blocks and a map to show the
  * events of the block
  *
- * @author hui
+ *  
  */
 public class _OLD__BlockInfoPanel extends JPanel implements TableModelListener {
 

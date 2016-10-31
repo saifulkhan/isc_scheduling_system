@@ -4,7 +4,7 @@ import java.util.Date;
 
 /**
  * this is an earthquake event class for th scheduling system
- * @author hui
+ *  
  * 
  */
 public class SeisEvent {

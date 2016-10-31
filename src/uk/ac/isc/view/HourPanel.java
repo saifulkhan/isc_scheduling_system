@@ -31,7 +31,7 @@ import uk.ac.isc.data.SeisEventList;
 
 /**
  *
- * @author hui
+ *  
  */
 public class HourPanel extends JPanel implements MouseListener {
 
